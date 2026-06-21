@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoiceRouteImport } from './routes/voice'
+import { Route as VisionRouteImport } from './routes/vision'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -20,6 +21,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
   path: '/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VisionRoute = VisionRouteImport.update({
+  id: '/vision',
+  path: '/vision',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoryRoute = MemoryRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
+  '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
+  '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
+  '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/memory'
+    | '/vision'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/memory'
+    | '/vision'
     | '/voice'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/memory'
+    | '/vision'
     | '/voice'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
   MemoryRoute: typeof MemoryRoute
+  VisionRoute: typeof VisionRoute
   VoiceRoute: typeof VoiceRoute
 }
 
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/voice'
       fullPath: '/voice'
       preLoaderRoute: typeof VoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vision': {
+      id: '/vision'
+      path: '/vision'
+      fullPath: '/vision'
+      preLoaderRoute: typeof VisionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memory': {
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
   MemoryRoute: MemoryRoute,
+  VisionRoute: VisionRoute,
   VoiceRoute: VoiceRoute,
 }
 export const routeTree = rootRouteImport
