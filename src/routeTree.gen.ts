@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as MemoryRouteImport } from './routes/memory'
+import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AutomationRouteImport } from './routes/automation'
 import { Route as AgentsRouteImport } from './routes/agents'
@@ -24,6 +25,11 @@ const VoiceRoute = VoiceRouteImport.update({
 const MemoryRoute = MemoryRouteImport.update({
   id: '/memory',
   path: '/memory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodingRoute = CodingRouteImport.update({
+  id: '/coding',
+  path: '/coding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/automation': typeof AutomationRoute
   '/chat': typeof ChatRoute
+  '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
   '/voice': typeof VoiceRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/automation': typeof AutomationRoute
   '/chat': typeof ChatRoute
+  '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
   '/voice': typeof VoiceRoute
 }
@@ -69,20 +77,36 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/automation': typeof AutomationRoute
   '/chat': typeof ChatRoute
+  '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agents' | '/automation' | '/chat' | '/memory' | '/voice'
+  fullPaths:
+    | '/'
+    | '/agents'
+    | '/automation'
+    | '/chat'
+    | '/coding'
+    | '/memory'
+    | '/voice'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agents' | '/automation' | '/chat' | '/memory' | '/voice'
+  to:
+    | '/'
+    | '/agents'
+    | '/automation'
+    | '/chat'
+    | '/coding'
+    | '/memory'
+    | '/voice'
   id:
     | '__root__'
     | '/'
     | '/agents'
     | '/automation'
     | '/chat'
+    | '/coding'
     | '/memory'
     | '/voice'
   fileRoutesById: FileRoutesById
@@ -92,6 +116,7 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   AutomationRoute: typeof AutomationRoute
   ChatRoute: typeof ChatRoute
+  CodingRoute: typeof CodingRoute
   MemoryRoute: typeof MemoryRoute
   VoiceRoute: typeof VoiceRoute
 }
@@ -110,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/memory'
       fullPath: '/memory'
       preLoaderRoute: typeof MemoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coding': {
+      id: '/coding'
+      path: '/coding'
+      fullPath: '/coding'
+      preLoaderRoute: typeof CodingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -148,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   AutomationRoute: AutomationRoute,
   ChatRoute: ChatRoute,
+  CodingRoute: CodingRoute,
   MemoryRoute: MemoryRoute,
   VoiceRoute: VoiceRoute,
 }
