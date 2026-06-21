@@ -17,6 +17,7 @@ import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AutomationRouteImport } from './routes/automation'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -60,6 +61,11 @@ const AutomationRoute = AutomationRouteImport.update({
   path: '/automation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgentsRoute = AgentsRouteImport.update({
   id: '/agents',
   path: '/agents',
@@ -74,6 +80,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/analytics': typeof AnalyticsRoute
   '/automation': typeof AutomationRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/analytics': typeof AnalyticsRoute
   '/automation': typeof AutomationRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agents': typeof AgentsRoute
+  '/analytics': typeof AnalyticsRoute
   '/automation': typeof AutomationRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agents'
+    | '/analytics'
     | '/automation'
     | '/chat'
     | '/coding'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agents'
+    | '/analytics'
     | '/automation'
     | '/chat'
     | '/coding'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agents'
+    | '/analytics'
     | '/automation'
     | '/chat'
     | '/coding'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentsRoute: typeof AgentsRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   AutomationRoute: typeof AutomationRoute
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agents': {
       id: '/agents'
       path: '/agents'
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentsRoute: AgentsRoute,
+  AnalyticsRoute: AnalyticsRoute,
   AutomationRoute: AutomationRoute,
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
