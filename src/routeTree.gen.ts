@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as VisionRouteImport } from './routes/vision'
+import { Route as ResearchRouteImport } from './routes/research'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -26,6 +27,11 @@ const VoiceRoute = VoiceRouteImport.update({
 const VisionRoute = VisionRouteImport.update({
   id: '/vision',
   path: '/vision',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResearchRoute = ResearchRouteImport.update({
+  id: '/research',
+  path: '/research',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoryRoute = MemoryRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
+  '/research': typeof ResearchRoute
   '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
+  '/research': typeof ResearchRoute
   '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/memory': typeof MemoryRoute
+  '/research': typeof ResearchRoute
   '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/memory'
+    | '/research'
     | '/vision'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/memory'
+    | '/research'
     | '/vision'
     | '/voice'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/memory'
+    | '/research'
     | '/vision'
     | '/voice'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
   MemoryRoute: typeof MemoryRoute
+  ResearchRoute: typeof ResearchRoute
   VisionRoute: typeof VisionRoute
   VoiceRoute: typeof VoiceRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/vision'
       fullPath: '/vision'
       preLoaderRoute: typeof VisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/research': {
+      id: '/research'
+      path: '/research'
+      fullPath: '/research'
+      preLoaderRoute: typeof ResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memory': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
   MemoryRoute: MemoryRoute,
+  ResearchRoute: ResearchRoute,
   VisionRoute: VisionRoute,
   VoiceRoute: VoiceRoute,
 }
