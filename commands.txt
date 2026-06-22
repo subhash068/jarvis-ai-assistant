@@ -1,0 +1,7 @@
+npm run dev
+
+
+
+cd backend
+.\venv\Scripts\activate
+fastapi dev main.py

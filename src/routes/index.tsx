@@ -5,6 +5,7 @@ import { VoiceOrb, Waveform } from "@/components/ui-kit/voice";
 import { Activity, MessageSquare, Brain, Bot, Cpu, Mic, Play, Pause, ArrowUpRight } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,36 +17,43 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
-const activityData = Array.from({ length: 24 }).map((_, i) => ({
-  hour: `${i}:00`,
-  conversations: Math.round(20 + Math.sin(i / 3) * 18 + Math.random() * 12),
-  voice: Math.round(10 + Math.cos(i / 4) * 9 + Math.random() * 8),
-}));
-
-const commands = [
-  { time: "2m ago", text: "Summarize today's calendar and brief me", agent: "Planner" },
-  { time: "14m ago", text: "Generate a Python script to deduplicate the CSV", agent: "Coding" },
-  { time: "1h ago", text: "Research the latest on small language models", agent: "Research" },
-  { time: "3h ago", text: "Remind me to call mom at 7pm", agent: "Productivity" },
-  { time: "5h ago", text: "Open Spotify and play focus playlist", agent: "Automation" },
-];
-
-const agents = [
-  { name: "Planner",    status: "Active",  success: 98 },
-  { name: "Research",   status: "Active",  success: 94 },
-  { name: "Coding",     status: "Idle",    success: 96 },
-  { name: "Productivity", status: "Active", success: 99 },
-  { name: "Automation", status: "Standby", success: 91 },
-];
-
 function Dashboard() {
+  const { data: analytics } = useQuery({
+    queryKey: ["analytics", 1],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/analytics/1");
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    }
+  });
+
+  const { data: agents = [] } = useQuery({
+    queryKey: ["agents"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/agents/");
+      if (!res.ok) throw new Error("Failed to fetch agents");
+      return res.json();
+    }
+  });
+
+  const { data: commands = [] } = useQuery({
+    queryKey: ["agentLogs"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:8000/agents/logs");
+      if (!res.ok) throw new Error("Failed to fetch logs");
+      return res.json();
+    }
+  });
+
+  const activityData = analytics?.daily || [];
+
   return (
     <AppShell title="Mission Control" subtitle="Welcome back, Jordan. Your assistant is online and ready.">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-        <StatCard label="Conversations" value="1,284" delta="+12.4% this week" icon={<MessageSquare className="h-5 w-5" />} delay={0} />
-        <StatCard label="Voice Sessions" value="362" delta="+5.1% this week" icon={<Mic className="h-5 w-5" />} accent="cyan" delay={0.05} />
-        <StatCard label="Stored Memories" value="8,940" delta="+218 today" icon={<Brain className="h-5 w-5" />} accent="neon" delay={0.1} />
-        <StatCard label="Agent Runs" value="2,176" delta="98.2% success" icon={<Bot className="h-5 w-5" />} delay={0.15} />
+        <StatCard label="Conversations" value={analytics ? analytics.total_conversations.toString() : "..."} delta="+12.4% this week" icon={<MessageSquare className="h-5 w-5" />} delay={0} />
+        <StatCard label="Voice Sessions" value={analytics ? analytics.voice_minutes.toString() : "..."} delta="+5.1% this week" icon={<Mic className="h-5 w-5" />} accent="cyan" delay={0.05} />
+        <StatCard label="Stored Memories" value={analytics ? analytics.total_memories.toString() : "..."} delta="+218 today" icon={<Brain className="h-5 w-5" />} accent="neon" delay={0.1} />
+        <StatCard label="Agent Runs" value="2,176" delta={analytics ? `${analytics.agent_success} success` : "..."} icon={<Bot className="h-5 w-5" />} delay={0.15} />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-8">
@@ -102,9 +110,9 @@ function Dashboard() {
         <GlassCard className="lg:col-span-2" delay={0.05}>
           <SectionHeader title="Recent commands" action={<a className="text-xs text-primary inline-flex items-center gap-1">View all <ArrowUpRight className="h-3 w-3" /></a>} />
           <ul className="divide-y divide-border">
-            {commands.map((c, i) => (
+            {commands.slice(0, 5).map((c: any, i: number) => (
               <motion.li
-                key={i}
+                key={c.id || i}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + i * 0.04 }}
@@ -115,11 +123,13 @@ function Dashboard() {
                     <Activity className="h-4 w-4 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm truncate">{c.text}</div>
-                    <div className="text-xs text-muted-foreground">{c.time} · {c.agent} agent</div>
+                    <div className="text-sm truncate">{c.task}</div>
+                    <div className="text-xs text-muted-foreground">{c.time_ago} ago · {c.agent_name} agent</div>
                   </div>
                 </div>
-                <span className="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full glass">Done</span>
+                <span className={`text-[10px] uppercase tracking-widest px-2 py-1 rounded-full ${c.ok ? 'bg-emerald-500/15 text-emerald-300' : 'bg-destructive/15 text-destructive'}`}>
+                  {c.ok ? 'Done' : 'Failed'}
+                </span>
               </motion.li>
             ))}
           </ul>
@@ -128,18 +138,18 @@ function Dashboard() {
         <GlassCard delay={0.1}>
           <SectionHeader title="Agent activity" />
           <ul className="space-y-3">
-            {agents.map((a, i) => (
-              <li key={i} className="flex items-center gap-3">
+            {agents.map((a: any, i: number) => (
+              <li key={a.id || i} className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-lg gradient-cyan grid place-items-center">
                   <Cpu className="h-4 w-4 text-background" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">{a.name}</span>
-                    <span className="text-xs text-muted-foreground">{a.success}%</span>
+                    <span className="text-xs text-muted-foreground">{a.success_rate}%</span>
                   </div>
                   <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full gradient-primary" style={{ width: `${a.success}%` }} />
+                    <div className="h-full gradient-primary" style={{ width: `${a.success_rate}%` }} />
                   </div>
                 </div>
                 <span className={`text-[10px] uppercase tracking-widest px-2 py-1 rounded-full ${a.status === "Active" ? "bg-emerald-500/15 text-emerald-300" : a.status === "Idle" ? "glass" : "bg-amber-500/15 text-amber-300"}`}>
