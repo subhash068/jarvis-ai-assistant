@@ -63,6 +63,19 @@ async def toggle_task(task_id: int, db: AsyncSession = Depends(get_db)):
     await db.refresh(task)
     return task
 
+@router.delete("/tasks/{task_id}")
+async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
+    stmt = select(Task).filter(Task.id == task_id)
+    res = await db.execute(stmt)
+    task = res.scalar_one_or_none()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    await db.delete(task)
+    await db.commit()
+    return {"message": "Task deleted"}
+
+
 @router.get("/meetings", response_model=List[MeetingResponse])
 async def get_meetings(user_id: int = 1, db: AsyncSession = Depends(get_db)):
     stmt = select(Meeting).filter(Meeting.user_id == user_id).order_by(Meeting.id.asc())

@@ -32,143 +32,113 @@ function VoicePage() {
   const [interimText, setInterimText] = useState("");
   const [language, setLanguage] = useState(LANGUAGES[0]);
 
-  const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      synthRef.current = window.speechSynthesis;
-    }
+    const ws = new WebSocket("ws://localhost:8000/voice/stream");
+    wsRef.current = ws;
 
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = language.code;
-
-      recognition.onstart = () => {
-        setIsRecording(true);
-      };
-
-      recognition.onresult = (event: any) => {
-        let interim = "";
-        let final = "";
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript;
-          } else {
-            interim += event.results[i][0].transcript;
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "status") {
+          setInterimText(data.message);
+        } else if (data.type === "transcription") {
+          setMessages((prev) => [...prev, { role: "user", text: data.text }]);
+          setInterimText("");
+        } else if (data.type === "speech_response") {
+          setMessages((prev) => [...prev, { role: "ai", text: data.text }]);
+          setInterimText("");
+          
+          if (data.audio && !isMuted) {
+            const audioBytes = atob(data.audio);
+            const arrayBuffer = new ArrayBuffer(audioBytes.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < audioBytes.length; i++) {
+              uint8Array[i] = audioBytes.charCodeAt(i);
+            }
+            const blob = new Blob([arrayBuffer], { type: "audio/mp3" });
+            const url = URL.createObjectURL(blob);
+            
+            if (audioRef.current) {
+              audioRef.current.pause();
+            }
+            const audio = new Audio(url);
+            audioRef.current = audio;
+            audio.onplay = () => setIsSpeaking(true);
+            audio.onended = () => setIsSpeaking(false);
+            audio.onerror = () => setIsSpeaking(false);
+            audio.play().catch(err => console.error("Audio playback failed", err));
           }
         }
-
-        setInterimText(interim);
-
-        if (final) {
-          handleUserMessage(final);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
-        setIsRecording(false);
-        setInterimText("");
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-        setInterimText("");
-      };
-
-      recognitionRef.current = recognition;
-    } else {
-      console.warn("Speech Recognition API not supported in this browser.");
-    }
+      } catch (e) {
+        console.error("Failed to parse Voice WebSocket message:", e);
+      }
+    };
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
+      if (ws) ws.close();
     };
   }, [language]);
 
-  const startListening = () => {
-    if (recognitionRef.current && !isRecording) {
-      // Stop any current speech before listening
-      if (synthRef.current) synthRef.current.cancel();
-      
-      try {
-        recognitionRef.current.start();
-      } catch (e) {
-        console.error("Could not start recognition:", e);
-      }
+  const startListening = async () => {
+    if (audioRef.current) audioRef.current.pause();
+    setIsSpeaking(false);
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0 && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(event.data);
+        }
+      };
+
+      mediaRecorder.onstart = () => {
+        setIsRecording(true);
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: "start_stream", language: language.code }));
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: "end_stream" }));
+        }
+      };
+
+      // Stream live chunks every 250ms
+      mediaRecorder.start(250);
+    } catch (e) {
+      console.error("Microphone capture failed:", e);
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current && isRecording) {
-      recognitionRef.current.stop();
-    }
-  };
-
-  const speakText = (text: string) => {
-    if (isMuted || !synthRef.current) return;
-    
-    // Stop any existing speech
-    synthRef.current.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language.code;
-    
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    synthRef.current.speak(utterance);
-  };
-
-  const handleUserMessage = async (text: string) => {
-    setMessages((prev) => [...prev, { role: "user", text }]);
-    
-    try {
-      const response = await fetch("http://localhost:8000/chat/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: 1, message: text }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMessages((prev) => [...prev, { role: "ai", text: data.content }]);
-        speakText(data.content);
-      } else {
-        const errorText = "Sorry, I couldn't reach the backend server.";
-        setMessages((prev) => [...prev, { role: "ai", text: errorText }]);
-        speakText(errorText);
-      }
-    } catch (error) {
-      console.error("Network error:", error);
-      const errorText = "Network error connecting to Jarvis.";
-      setMessages((prev) => [...prev, { role: "ai", text: errorText }]);
-      speakText(errorText);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
     }
   };
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    if (!isMuted && synthRef.current) {
-      synthRef.current.cancel();
+    if (!isMuted && audioRef.current) {
+      audioRef.current.pause();
       setIsSpeaking(false);
     }
   };
 
   const stopAll = () => {
     stopListening();
-    if (synthRef.current) {
-      synthRef.current.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
     }
     setIsSpeaking(false);
   };

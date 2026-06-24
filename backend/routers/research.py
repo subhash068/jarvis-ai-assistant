@@ -6,6 +6,7 @@ from typing import List
 from database import get_db
 from models import ResearchReport, ResearchFinding
 from llm_service import client, MODEL_NAME
+from search_service import SearchService
 
 router = APIRouter(
     prefix="/research",
@@ -49,12 +50,21 @@ async def get_findings(user_id: int = 1, db: AsyncSession = Depends(get_db)):
 @router.post("/generate", response_model=ReportResponse)
 async def generate_report(req: GenerateRequest, db: AsyncSession = Depends(get_db)):
     try:
-        # Prompt LLM to write a research report about the topic
+        # Perform real web search to gather context
+        context = await SearchService.search_and_scrape(req.topic, limit=4)
+        
+        # Calculate actual sources count
+        sources = context.count("--- URL SOURCE:") if context else 0
+        if sources == 0:
+            sources = 1 # Fallback so it doesn't show 0 if it relied on generic LLM knowledge
+            
+        # Prompt LLM to write a research report about the topic using context
         system_prompt = (
             "You are a Senior Research Analyst. Write a detailed, professional research report "
-            "summarizing key trends, numbers, and references. Be informative and structured."
+            "summarizing key trends, numbers, and references based on the provided Web Search Context. "
+            "Be informative, structured, and cite sources where possible."
         )
-        user_prompt = f"Create a research report on: {req.topic}"
+        user_prompt = f"Topic: {req.topic}\n\nWeb Search Context:\n{context}\n\nCreate a comprehensive research report on this topic."
         
         response = await client.chat.completions.create(
             model=MODEL_NAME,
@@ -63,13 +73,12 @@ async def generate_report(req: GenerateRequest, db: AsyncSession = Depends(get_d
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.7,
-            max_tokens=600
+            max_tokens=800
         )
         report_content = response.choices[0].message.content or "No content generated."
         
         # Create a new report entry in DB
-        import random
-        sources = random.randint(4, 15)
+
         new_report = ResearchReport(
             user_id=req.user_id,
             title=req.topic,

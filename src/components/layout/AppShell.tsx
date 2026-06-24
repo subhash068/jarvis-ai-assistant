@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, Mic, MessageSquare, Brain, Bot, Cpu, Code2,
-  Eye, Search, CalendarCheck, BarChart3, Settings, Sparkles,
+  Eye, Globe, Monitor, Search, CalendarCheck, Sparkles, BarChart3, Settings, PlaySquare, Image
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -10,15 +10,17 @@ const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/voice", label: "Voice", icon: Mic },
   { to: "/chat", label: "Chat", icon: MessageSquare },
-  { to: "/memory", label: "Memory", icon: Brain },
-  { to: "/agents", label: "Agents", icon: Bot },
+  { to: "/system-events", label: "System Events", icon: Brain },
   { to: "/automation", label: "Automation", icon: Cpu },
+  { to: "/browser", label: "Browser", icon: Globe },
+  { to: "/pc-automation", label: "PC Control", icon: Monitor },
   { to: "/coding", label: "Coding", icon: Code2 },
   { to: "/vision", label: "Vision", icon: Eye },
   { to: "/research", label: "Research", icon: Search },
   { to: "/productivity", label: "Productivity", icon: CalendarCheck },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/image-generation", label: "Image Generation", icon: Image },
   { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/testing-engine", label: "Testing Engine", icon: PlaySquare },
 ] as const;
 
 export function AppShell({ children, title, subtitle }: { children: ReactNode; title: string; subtitle?: string }) {
@@ -42,7 +44,7 @@ export function AppShell({ children, title, subtitle }: { children: ReactNode; t
             return (
               <Link
                 key={to}
-                to={to}
+                to={to as any}
                 className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all ${
                   active
                     ? "bg-sidebar-accent text-foreground shadow-glow"
@@ -82,11 +84,11 @@ export function AppShell({ children, title, subtitle }: { children: ReactNode; t
             <div className="flex items-center gap-3">
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_currentColor]" />
-                Online · GPT-4o
+                Online · Llama 3.3
               </div>
-              <button className="h-9 w-9 rounded-full gradient-primary grid place-items-center shadow-glow">
+              <Link to="/voice" className="h-9 w-9 rounded-full gradient-primary grid place-items-center shadow-glow hover:opacity-90 transition-opacity">
                 <Mic className="h-4 w-4 text-primary-foreground" />
-              </button>
+              </Link>
             </div>
           </div>
         </header>

@@ -11,15 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VoiceRouteImport } from './routes/voice'
 import { Route as VisionRouteImport } from './routes/vision'
+import { Route as TestingEngineRouteImport } from './routes/testing-engine'
+import { Route as SystemEventsRouteImport } from './routes/system-events'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResearchRouteImport } from './routes/research'
 import { Route as ProductivityRouteImport } from './routes/productivity'
-import { Route as MemoryRouteImport } from './routes/memory'
+import { Route as PcAutomationRouteImport } from './routes/pc-automation'
+import { Route as ImageGenerationRouteImport } from './routes/image-generation'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as BrowserRouteImport } from './routes/browser'
 import { Route as AutomationRouteImport } from './routes/automation'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as IndexRouteImport } from './routes/index'
 
 const VoiceRoute = VoiceRouteImport.update({
@@ -30,6 +32,16 @@ const VoiceRoute = VoiceRouteImport.update({
 const VisionRoute = VisionRouteImport.update({
   id: '/vision',
   path: '/vision',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestingEngineRoute = TestingEngineRouteImport.update({
+  id: '/testing-engine',
+  path: '/testing-engine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SystemEventsRoute = SystemEventsRouteImport.update({
+  id: '/system-events',
+  path: '/system-events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -47,9 +59,14 @@ const ProductivityRoute = ProductivityRouteImport.update({
   path: '/productivity',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MemoryRoute = MemoryRouteImport.update({
-  id: '/memory',
-  path: '/memory',
+const PcAutomationRoute = PcAutomationRouteImport.update({
+  id: '/pc-automation',
+  path: '/pc-automation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImageGenerationRoute = ImageGenerationRouteImport.update({
+  id: '/image-generation',
+  path: '/image-generation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CodingRoute = CodingRouteImport.update({
@@ -62,19 +79,14 @@ const ChatRoute = ChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrowserRoute = BrowserRouteImport.update({
+  id: '/browser',
+  path: '/browser',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AutomationRoute = AutomationRouteImport.update({
   id: '/automation',
   path: '/automation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgentsRoute = AgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -85,44 +97,50 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
-  '/analytics': typeof AnalyticsRoute
   '/automation': typeof AutomationRoute
+  '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
-  '/memory': typeof MemoryRoute
+  '/image-generation': typeof ImageGenerationRoute
+  '/pc-automation': typeof PcAutomationRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
+  '/system-events': typeof SystemEventsRoute
+  '/testing-engine': typeof TestingEngineRoute
   '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
-  '/analytics': typeof AnalyticsRoute
   '/automation': typeof AutomationRoute
+  '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
-  '/memory': typeof MemoryRoute
+  '/image-generation': typeof ImageGenerationRoute
+  '/pc-automation': typeof PcAutomationRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
+  '/system-events': typeof SystemEventsRoute
+  '/testing-engine': typeof TestingEngineRoute
   '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/agents': typeof AgentsRoute
-  '/analytics': typeof AnalyticsRoute
   '/automation': typeof AutomationRoute
+  '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
-  '/memory': typeof MemoryRoute
+  '/image-generation': typeof ImageGenerationRoute
+  '/pc-automation': typeof PcAutomationRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
+  '/system-events': typeof SystemEventsRoute
+  '/testing-engine': typeof TestingEngineRoute
   '/vision': typeof VisionRoute
   '/voice': typeof VoiceRoute
 }
@@ -130,58 +148,66 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/agents'
-    | '/analytics'
     | '/automation'
+    | '/browser'
     | '/chat'
     | '/coding'
-    | '/memory'
+    | '/image-generation'
+    | '/pc-automation'
     | '/productivity'
     | '/research'
     | '/settings'
+    | '/system-events'
+    | '/testing-engine'
     | '/vision'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/agents'
-    | '/analytics'
     | '/automation'
+    | '/browser'
     | '/chat'
     | '/coding'
-    | '/memory'
+    | '/image-generation'
+    | '/pc-automation'
     | '/productivity'
     | '/research'
     | '/settings'
+    | '/system-events'
+    | '/testing-engine'
     | '/vision'
     | '/voice'
   id:
     | '__root__'
     | '/'
-    | '/agents'
-    | '/analytics'
     | '/automation'
+    | '/browser'
     | '/chat'
     | '/coding'
-    | '/memory'
+    | '/image-generation'
+    | '/pc-automation'
     | '/productivity'
     | '/research'
     | '/settings'
+    | '/system-events'
+    | '/testing-engine'
     | '/vision'
     | '/voice'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AgentsRoute: typeof AgentsRoute
-  AnalyticsRoute: typeof AnalyticsRoute
   AutomationRoute: typeof AutomationRoute
+  BrowserRoute: typeof BrowserRoute
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
-  MemoryRoute: typeof MemoryRoute
+  ImageGenerationRoute: typeof ImageGenerationRoute
+  PcAutomationRoute: typeof PcAutomationRoute
   ProductivityRoute: typeof ProductivityRoute
   ResearchRoute: typeof ResearchRoute
   SettingsRoute: typeof SettingsRoute
+  SystemEventsRoute: typeof SystemEventsRoute
+  TestingEngineRoute: typeof TestingEngineRoute
   VisionRoute: typeof VisionRoute
   VoiceRoute: typeof VoiceRoute
 }
@@ -200,6 +226,20 @@ declare module '@tanstack/react-router' {
       path: '/vision'
       fullPath: '/vision'
       preLoaderRoute: typeof VisionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/testing-engine': {
+      id: '/testing-engine'
+      path: '/testing-engine'
+      fullPath: '/testing-engine'
+      preLoaderRoute: typeof TestingEngineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/system-events': {
+      id: '/system-events'
+      path: '/system-events'
+      fullPath: '/system-events'
+      preLoaderRoute: typeof SystemEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -223,11 +263,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductivityRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/memory': {
-      id: '/memory'
-      path: '/memory'
-      fullPath: '/memory'
-      preLoaderRoute: typeof MemoryRouteImport
+    '/pc-automation': {
+      id: '/pc-automation'
+      path: '/pc-automation'
+      fullPath: '/pc-automation'
+      preLoaderRoute: typeof PcAutomationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/image-generation': {
+      id: '/image-generation'
+      path: '/image-generation'
+      fullPath: '/image-generation'
+      preLoaderRoute: typeof ImageGenerationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coding': {
@@ -244,25 +291,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/browser': {
+      id: '/browser'
+      path: '/browser'
+      fullPath: '/browser'
+      preLoaderRoute: typeof BrowserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/automation': {
       id: '/automation'
       path: '/automation'
       fullPath: '/automation'
       preLoaderRoute: typeof AutomationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agents': {
-      id: '/agents'
-      path: '/agents'
-      fullPath: '/agents'
-      preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -277,15 +317,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AgentsRoute: AgentsRoute,
-  AnalyticsRoute: AnalyticsRoute,
   AutomationRoute: AutomationRoute,
+  BrowserRoute: BrowserRoute,
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
-  MemoryRoute: MemoryRoute,
+  ImageGenerationRoute: ImageGenerationRoute,
+  PcAutomationRoute: PcAutomationRoute,
   ProductivityRoute: ProductivityRoute,
   ResearchRoute: ResearchRoute,
   SettingsRoute: SettingsRoute,
+  SystemEventsRoute: SystemEventsRoute,
+  TestingEngineRoute: TestingEngineRoute,
   VisionRoute: VisionRoute,
   VoiceRoute: VoiceRoute,
 }

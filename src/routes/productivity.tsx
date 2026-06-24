@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { GlassCard, StatCard, SectionHeader } from "@/components/ui-kit/cards";
-import { CheckCircle2, Circle, CalendarDays, StickyNote, Users, Clock, Plus } from "lucide-react";
+import { CheckCircle2, Circle, CalendarDays, StickyNote, Users, Clock, Plus, ChevronDown, Trash2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -19,6 +19,7 @@ function ProductivityPage() {
   const queryClient = useQueryClient();
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskDue, setNewTaskDue] = useState("Today");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Fetch tasks
   const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
@@ -71,6 +72,20 @@ function ProductivityPage() {
     },
   });
 
+  // Delete task mutation
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: number) => {
+      const res = await fetch(`http://localhost:8000/productivity/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete task");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskText.trim()) return;
@@ -107,16 +122,36 @@ function ProductivityPage() {
               onChange={(e) => setNewTaskText(e.target.value)}
               className="flex-1 bg-transparent glass rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
             />
-            <select
-              value={newTaskDue}
-              onChange={(e) => setNewTaskDue(e.target.value)}
-              className="bg-transparent glass rounded-xl px-3 py-2 text-xs outline-none border-none cursor-pointer text-white"
-            >
-              <option value="Today" className="bg-neutral-900">Today</option>
-              <option value="Tomorrow" className="bg-neutral-900">Tomorrow</option>
-              <option value="This Friday" className="bg-neutral-900">Friday</option>
-              <option value="Next Week" className="bg-neutral-900">Next Week</option>
-            </select>
+            <div className="relative flex items-center">
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="bg-transparent glass rounded-xl px-3 py-2.5 text-xs outline-none border-none cursor-pointer text-white flex items-center gap-1.5 h-full whitespace-nowrap"
+              >
+                {newTaskDue === 'This Friday' ? 'Friday' : newTaskDue} <ChevronDown className="h-3 w-3 opacity-70" />
+              </button>
+              
+              {isDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsDropdownOpen(false)} 
+                  />
+                  <div className="absolute top-full mt-2 left-0 glass-strong border border-border rounded-xl shadow-elegant overflow-hidden z-50 flex flex-col min-w-[120px] py-1">
+                    {["Today", "Tomorrow", "This Friday", "Next Week"].map(opt => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => { setNewTaskDue(opt); setIsDropdownOpen(false); }}
+                        className={`px-4 py-2 text-xs text-left hover:bg-white/10 transition-colors ${newTaskDue === opt ? 'text-primary font-medium' : 'text-foreground'}`}
+                      >
+                        {opt === 'This Friday' ? 'Friday' : opt}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             <button
               type="submit"
               className="px-3 py-2 rounded-xl gradient-primary text-primary-foreground font-medium text-xs flex items-center justify-center gap-1 shadow-glow"
@@ -142,6 +177,17 @@ function ProductivityPage() {
                   </div>
                   <div className="text-[11px] text-muted-foreground">{t.due}</div>
                 </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteTaskMutation.mutate(t.id);
+                  }}
+                  className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                  title="Delete task"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </li>
             ))}
             {tasks.length === 0 && (

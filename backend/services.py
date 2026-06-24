@@ -11,8 +11,11 @@ from models import User, Message
 try:
     chroma_client = chromadb.PersistentClient(path="./.chroma_db")
     collection = chroma_client.get_or_create_collection(name="chat_messages")
+    memory_collection = chroma_client.get_or_create_collection(name="user_memories")
 except Exception as e:
     print(f"Failed to initialize ChromaDB: {e}")
+    collection = None
+    memory_collection = None
 
 # Pydantic Schemas
 class UserCreate(BaseModel):
@@ -103,7 +106,17 @@ class MemoryCreate(BaseModel):
 class MemoryService:
     @staticmethod
     async def create_memory(db: AsyncSession, memory_in: MemoryCreate) -> Memory:
-        return await memory_repo.create(db, memory_in)
+        new_memory = await memory_repo.create(db, memory_in)
+        if memory_collection is not None:
+            try:
+                memory_collection.add(
+                    documents=[memory_in.content],
+                    metadatas=[{"category": memory_in.category, "user_id": memory_in.user_id}],
+                    ids=[str(new_memory.id)]
+                )
+            except Exception as e:
+                print(f"ChromaDB Memory Indexing Error: {e}")
+        return new_memory
 
     @staticmethod
     async def get_user_memories(db: AsyncSession, user_id: int) -> List[Memory]:
@@ -112,7 +125,38 @@ class MemoryService:
     @staticmethod
     async def delete_memory(db: AsyncSession, memory_id: int) -> bool:
         obj = await memory_repo.delete(db, memory_id)
+        if obj and memory_collection is not None:
+            try:
+                memory_collection.delete(ids=[str(memory_id)])
+            except Exception as e:
+                print(f"ChromaDB Memory Delete Error: {e}")
         return obj is not None
+
+    @staticmethod
+    async def search_memories(query: str, user_id: int = 1, limit: int = 5) -> List[dict]:
+        """Perform semantic search on user memories using ChromaDB."""
+        if memory_collection is None:
+            return []
+        try:
+            # query_texts will automatically run local embeddings using default all-MiniLM-L6-v2 ONNX model
+            results = memory_collection.query(
+                query_texts=[query],
+                n_results=limit,
+                where={"user_id": user_id}
+            )
+            retrieved = []
+            if results and results["documents"] and len(results["documents"]) > 0:
+                for i in range(len(results["documents"][0])):
+                    retrieved.append({
+                        "id": int(results["ids"][0][i]),
+                        "content": results["documents"][0][i],
+                        "category": results["metadatas"][0][i].get("category", "General"),
+                        "distance": results["distances"][0][i] if "distances" in results else 0.0
+                    })
+            return retrieved
+        except Exception as e:
+            print(f"ChromaDB Memory Search Error: {e}")
+            return []
 
 from repositories import thread_repo
 from models import Thread
@@ -129,3 +173,8 @@ class ThreadService:
     @staticmethod
     async def get_user_threads(db: AsyncSession, user_id: int) -> List[Thread]:
         return await thread_repo.get_by_user(db, user_id)
+
+    @staticmethod
+    async def delete_thread(db: AsyncSession, thread_id: int) -> bool:
+        obj = await thread_repo.delete(db, thread_id)
+        return obj is not None

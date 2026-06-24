@@ -40,7 +40,7 @@ extraction_tools = [
                 "properties": {
                     "intent": {
                         "type": "string",
-                        "enum": ["book_flight", "get_weather", "execute_system_action", "general_chat"],
+                        "enum": ["book_flight", "get_weather", "execute_system_action", "automate_browser", "automate_computer", "scrape_website", "general_chat"],
                         "description": "The classified intent of the user's message."
                     },
                     "entities": {
@@ -61,6 +61,18 @@ extraction_tools = [
                             "app_or_command": {
                                 "type": "string",
                                 "description": "The name of the application or command to execute on the system (e.g., Chrome, Spotify, Notepad)."
+                            },
+                            "browser_instruction": {
+                                "type": "string",
+                                "description": "The complex instruction for the browser automation to execute, e.g., 'Go to Google and search for X' or 'Open Amazon and click the first result'."
+                            },
+                            "computer_instruction": {
+                                "type": "string",
+                                "description": "The complex instruction for controlling the computer using GUI automation, e.g., 'Open notepad and type hello', 'take a screenshot', 'change volume to 50'."
+                            },
+                            "url": {
+                                "type": "string",
+                                "description": "The URL of the website to scrape."
                             }
                         }
                     }
@@ -70,6 +82,7 @@ extraction_tools = [
         }
     }
 ]
+
 
 def mock_book_flight(destination: str, date: str) -> str:
     if not destination or not date:
@@ -82,6 +95,28 @@ def mock_get_weather(location: str) -> str:
     return f"The weather in {location} is currently 72°F and sunny."
 
 class LLMService:
+    @staticmethod
+    async def _generate_conversational_response(user_message: str, action_result: str, conversation_history: list) -> str:
+        prompt = f"The user asked: '{user_message}'. You executed the action and the system returned this result: '{action_result}'. Reply to the user in a natural, conversational way to confirm what you did or explain any errors. Keep it brief and speak directly to the user as their AI assistant."
+        messages = [
+            {"role": "system", "content": "You are JARVIS, a helpful and conversational AI voice assistant."}
+        ]
+        for msg in conversation_history:
+            messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": prompt})
+        
+        try:
+            response = await client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=250
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error generating conversational wrapper: {e}")
+            return action_result
+
     @staticmethod
     async def extract_intent_and_entities(new_message: str) -> dict:
         """Forces the LLM to extract intent and entities from the message."""
@@ -107,11 +142,31 @@ class LLMService:
             return {"intent": "general_chat", "entities": {}}
 
     @staticmethod
-    async def generate_response(conversation_history: list[dict], new_message: str) -> str:
+    async def generate_response(conversation_history: list[dict], new_message: str, web_search: bool = False) -> str:
         """
         Acts as the Dialogue Manager. First extracts intent, then routes to appropriate mock tools
         or falls back to general chat.
         """
+        if web_search:
+            from search_service import SearchService
+            search_context = await SearchService.search_and_scrape(new_message)
+            
+            prompt = f"Answer the user's query: '{new_message}' based on the following web search and scraped website contents:\n\n{search_context}"
+            messages = [
+                {"role": "system", "content": "You are JARVIS. Answer the user's query by summarizing, comparing, and synthesizing details from the provided search results. Provide clean, well-structured markdown answers."},
+                {"role": "user", "content": prompt}
+            ]
+            try:
+                response = await client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=messages,
+                    temperature=0.4
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                print(f"Error answering search query: {e}")
+                return f"I performed a web search but could not process the findings: {str(e)}"
+
         # Step 1: Extract intent and entities
         extraction = await LLMService.extract_intent_and_entities(new_message)
         intent = extraction.get("intent", "general_chat")
@@ -126,11 +181,64 @@ class LLMService:
             return mock_get_weather(entities.get("location"))
         elif intent == "execute_system_action":
             from automation_service import AutomationService
-            return AutomationService.execute_app(entities.get("app_or_command", ""))
+            result = AutomationService.execute_app(entities.get("app_or_command", ""))
+            return await LLMService._generate_conversational_response(new_message, result, conversation_history)
+        elif intent == "automate_browser":
+            from automation_service import AutomationService
+            result = await AutomationService.execute_advanced_browser_action(
+                instruction=entities.get("browser_instruction", new_message)
+            )
+            return await LLMService._generate_conversational_response(new_message, result, conversation_history)
+        elif intent == "automate_computer":
+            from automation_service import AutomationService
+            result = await AutomationService.execute_advanced_computer_action(
+                instruction=entities.get("computer_instruction", new_message)
+            )
+            return await LLMService._generate_conversational_response(new_message, result, conversation_history)
+        elif intent == "scrape_website":
+            url = entities.get("url")
+            if not url:
+                import re
+                urls = re.findall(r'(https?://\S+)', new_message)
+                url = urls[0] if urls else None
+                
+            if not url:
+                return "Please provide a valid website URL to scrape."
+                
+            from scraper_service import ScraperService
+            scraped_content = await ScraperService.scrape_url(url)
+            
+            prompt = f"Answer the user's query: '{new_message}' based on the text scraped from the website {url}:\n\n{scraped_content}"
+            messages = [
+                {"role": "system", "content": "You are a website content analyzer. Summarize or answer questions based on the provided webpage content concisely."},
+                {"role": "user", "content": prompt}
+            ]
+            try:
+                response = await client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=messages,
+                    temperature=0.3
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                print(f"Error analyzing scraped page: {e}")
+                return f"Successfully scraped the page but failed to analyze it: {str(e)}"
         else:
             # Step 3: Fallback to General Chat
+            try:
+                from services import MemoryService
+                memories = await MemoryService.search_memories(new_message, user_id=1, limit=3)
+                if memories:
+                    mem_context = "\n".join([f"- [{m['category']}] {m['content']}" for m in memories])
+                    sys_prompt = SYSTEM_PROMPT + f"\n\nRelevant user history and memories:\n{mem_context}"
+                else:
+                    sys_prompt = SYSTEM_PROMPT
+            except Exception as e:
+                print(f"Memory context injection error: {e}")
+                sys_prompt = SYSTEM_PROMPT
+
             messages = [
-                {"role": "system", "content": SYSTEM_PROMPT}
+                {"role": "system", "content": sys_prompt}
             ]
             
             # Add conversation history
@@ -151,3 +259,59 @@ class LLMService:
             except Exception as e:
                 print(f"Error calling LLM: {e}")
                 return "I'm sorry, my language core is experiencing interference. I couldn't process that request."
+
+    @staticmethod
+    async def generate_coding_snippet(tool_name: str, prompt: str) -> dict:
+        """Generates dynamic code snippets based on the chosen tool and user prompt."""
+        messages = [
+            {"role": "system", "content": "You are a senior pair programmer AI. Given a tool name and user prompt, output ONLY a raw JSON object with the following strictly required keys:\n- 'title' (string): A short title for the snippet.\n- 'language' (string): The programming language.\n- 'code' (string): The full, working code snippet (do not use markdown formatting inside the string, just raw code).\n- 'explanation' (array of strings): 3-5 short bullet points explaining the code."},
+            {"role": "user", "content": f"Tool: {tool_name}\nPrompt: {prompt}\n\nPlease generate the JSON object now. Ensure the 'code' key contains the actual implementation."}
+        ]
+        try:
+            response = await client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                response_format={"type": "json_object"},
+                temperature=0.3,
+                max_tokens=3000
+            )
+            data = json.loads(response.choices[0].message.content)
+            # Ensure safe fallback for missing keys
+            return {
+                "title": data.get("title", "Generated Code"),
+                "language": data.get("language", "Text"),
+                "code": data.get("code", "// Code generation failed. Please try again with a more specific prompt.") or "// Code returned empty.",
+                "explanation": data.get("explanation", ["No explanation provided."])
+            }
+        except Exception as e:
+            print(f"Coding generation error: {e}")
+            return {
+                "title": "Error Generating Code",
+                "language": "Text",
+                "code": f"An error occurred: {str(e)}",
+                "explanation": ["Failed to connect to the AI coding engine."]
+            }
+
+    @staticmethod
+    async def generate_playwright_test(prompt: str, url: str) -> str:
+        messages = [
+            {"role": "system", "content": "You are a senior QA automation engineer. Generate a valid, complete Playwright test script in TypeScript based on the user's prompt. Do not use markdown wrappers in your final output, just raw code. Do not include ```typescript or ``` tags. Start directly with import { test, expect } from '@playwright/test';"},
+            {"role": "user", "content": f"URL: {url}\nPrompt: {prompt}\n\nPlease generate the raw TypeScript code for this Playwright test."}
+        ]
+        try:
+            response = await client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                temperature=0.2,
+                max_tokens=3000
+            )
+            code = response.choices[0].message.content.strip()
+            # Failsafe stripping of markdown blocks just in case
+            if code.startswith("```"):
+                lines = code.split("\n")
+                if len(lines) > 2:
+                    code = "\n".join(lines[1:-1])
+            return code
+        except Exception as e:
+            print(f"Playwright generation error: {e}")
+            return f"// Failed to generate test: {str(e)}"

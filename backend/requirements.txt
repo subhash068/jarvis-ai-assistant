@@ -6,3 +6,15 @@ python-dotenv>=1.0.1
 alembic>=1.13.0
 chromadb>=0.4.24
 openai>=1.47.0
+mss>=10.2.0
+pytesseract>=0.3.13
+playwright>=1.47.0
+
+edge-tts
+pyautogui
+keyboard
+
+pyautogui
+keyboard
+websockets
+pdfjs-dist

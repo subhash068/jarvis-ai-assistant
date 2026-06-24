@@ -19,7 +19,6 @@ class MemoryResponse(BaseModel):
     created_at: datetime
     
     class Config:
-        orm_mode = True
         from_attributes = True
 
 @router.get("/", response_model=List[MemoryResponse])

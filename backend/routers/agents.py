@@ -59,3 +59,50 @@ async def get_agent_logs(db: AsyncSession = Depends(get_db)):
     stmt = select(AgentLog).order_by(AgentLog.id.desc())
     res = await db.execute(stmt)
     return list(res.scalars().all())
+
+class AgentRunRequest(BaseModel):
+    agent_id: int
+    task: str
+
+@router.post("/run")
+async def run_agent_task(request: AgentRunRequest, db: AsyncSession = Depends(get_db)):
+    stmt = select(Agent).filter(Agent.id == request.agent_id)
+    res = await db.execute(stmt)
+    agent = res.scalar_one_or_none()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+        
+    from agent_workflows import agent_graph
+    
+    # Run graph
+    inputs = {"task": request.task}
+    try:
+        result = await agent_graph.ainvoke(inputs)
+        output = result.get("final_output", "Task completed.")
+        
+        # Log execution
+        new_log = AgentLog(
+            agent_name=agent.name,
+            task=request.task,
+            time_ago="Just now",
+            ok=1
+        )
+        db.add(new_log)
+        
+        # Increment active jobs/tasks counter
+        agent.tasks += 1
+        await db.commit()
+        await db.refresh(agent)
+        
+        return {"status": "success", "result": output}
+    except Exception as e:
+        new_log = AgentLog(
+            agent_name=agent.name,
+            task=request.task,
+            time_ago="Just now",
+            ok=0
+        )
+        db.add(new_log)
+        await db.commit()
+        raise HTTPException(status_code=500, detail=str(e))
+

@@ -1,4 +1,10 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
+from llm_service import LLMService
+
+class LaunchRequest(BaseModel):
+    tool_name: str
+    prompt: str
 
 router = APIRouter(
     prefix="/coding",
@@ -28,3 +34,7 @@ async def get_snippet():
             "ElevenLabs streams the spoken response back through the socket."
         ]
     }
+
+@router.post("/launch")
+async def launch_tool(req: LaunchRequest):
+    return await LLMService.generate_coding_snippet(req.tool_name, req.prompt)

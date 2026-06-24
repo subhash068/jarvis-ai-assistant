@@ -5,3 +5,19 @@ npm run dev
 cd backend
 .\venv\Scripts\activate
 fastapi dev main.py
+
+
+
+
+
+
+
+MODEL_NAME = "llama-3.1-8b-instant"
+MODEL_NAME = "llama-3.3-70b-versatile"
+line 23 on llm_service.py
+
+
+
+"Give JARVIS a task: Type in a complex instruction. For example:
+"Go to Wikipedia, search for 'Artificial Intelligence', and tell me when you're done."
+"Open google.com and search for the latest tech news."

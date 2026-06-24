@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { GlassCard, SectionHeader } from "@/components/ui-kit/cards";
 import { FolderOpen, AppWindow, Globe, Terminal, Download, Plus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useRef } from "react";
 
 export const Route = createFileRoute("/automation")({
   head: () => ({
@@ -15,6 +16,9 @@ export const Route = createFileRoute("/automation")({
 });
 
 function AutomationPage() {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { data: apps = [] } = useQuery({
     queryKey: ["automation", "apps"],
     queryFn: async () => {
@@ -49,7 +53,69 @@ function AutomationPage() {
       if (!res.ok) throw new Error("Failed to fetch tasks");
       return res.json();
     },
+    refetchInterval: 1000,
   });
+
+  const handleDownload = (filename: string) => {
+    window.open(`http://localhost:8000/automation/files/${filename}`, "_blank");
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("http://localhost:8000/automation/files", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Failed to upload file");
+      queryClient.invalidateQueries({ queryKey: ["automation", "files"] });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload file");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleAppLaunch = async (appName: string) => {
+    try {
+      const res = await fetch("http://localhost:8000/automation/app", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ app_name: appName }),
+      });
+      if (!res.ok) throw new Error("Failed to launch app");
+      const data = await res.json();
+      // Optional: show a small toast or just let the app open silently
+      console.log(data.message);
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to launch ${appName}`);
+    }
+  };
+
+  const handleBrowserAction = async (action: string) => {
+    try {
+      const res = await fetch("http://localhost:8000/automation/browser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: action }),
+      });
+      if (!res.ok) throw new Error("Failed to execute browser action");
+      const data = await res.json();
+      if (data.message.includes("requires an extension")) {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to execute ${action}`);
+    }
+  };
 
   return (
     <AppShell title="Automation Center" subtitle="Tell JARVIS to act — files, apps, browser and commands.">
@@ -58,11 +124,15 @@ function AutomationPage() {
           <SectionHeader title="Application launcher" action={<AppWindow className="h-4 w-4 text-muted-foreground" />} />
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {apps.map((a: string) => (
-              <button key={a} className="glass rounded-xl p-4 text-center hover:bg-sidebar-accent transition">
-                <div className="h-10 w-10 rounded-lg gradient-primary mx-auto mb-2 grid place-items-center text-primary-foreground font-bold">
+              <button 
+                key={a} 
+                onClick={() => handleAppLaunch(a)}
+                className="glass rounded-xl p-4 text-center hover:bg-sidebar-accent hover:border-primary/50 transition cursor-pointer"
+              >
+                <div className="h-10 w-10 rounded-lg gradient-primary mx-auto mb-2 grid place-items-center text-primary-foreground font-bold shadow-glow">
                   {a.charAt(0)}
                 </div>
-                <div className="text-xs">{a}</div>
+                <div className="text-xs font-medium">{a}</div>
               </button>
             ))}
           </div>
@@ -73,9 +143,14 @@ function AutomationPage() {
           <div className="glass rounded-xl p-4 mb-3 text-xs text-muted-foreground">jarvis://browser/active</div>
           <ul className="space-y-2">
             {browserActions.map((s: string) => (
-              <li key={s} className="flex items-center justify-between glass rounded-lg px-3 py-2 text-sm">
+              <li key={s} className="flex items-center justify-between glass rounded-lg px-3 py-2 text-sm hover:bg-white/5 transition-colors">
                 <span>{s}</span>
-                <button className="text-xs text-primary hover:underline">Run</button>
+                <button 
+                  className="text-xs px-3 py-1 rounded-full gradient-primary text-primary-foreground font-medium shadow-glow hover:opacity-90 transition-opacity"
+                  onClick={() => handleBrowserAction(s)}
+                >
+                  Run
+                </button>
               </li>
             ))}
           </ul>
@@ -86,7 +161,22 @@ function AutomationPage() {
         <GlassCard className="lg:col-span-2">
           <SectionHeader
             title="File manager"
-            action={<button className="text-xs px-3 py-1.5 rounded-full gradient-primary text-primary-foreground inline-flex items-center gap-1"><Plus className="h-3.5 w-3.5" /> New</button>}
+            action={
+              <>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  onChange={handleFileUpload} 
+                />
+                <button 
+                  className="text-xs px-3 py-1.5 rounded-full gradient-primary text-primary-foreground inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity shadow-glow"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Plus className="h-3.5 w-3.5" /> New
+                </button>
+              </>
+            }
           />
           <ul className="divide-y divide-border">
             {files.map((f: any) => (
@@ -98,7 +188,12 @@ function AutomationPage() {
                     <div className="text-[11px] text-muted-foreground">{f.size} · {f.time}</div>
                   </div>
                 </div>
-                <button className="h-8 w-8 grid place-items-center rounded-lg hover:bg-sidebar-accent"><Download className="h-4 w-4" /></button>
+                <button 
+                  className="h-8 w-8 grid place-items-center rounded-lg hover:bg-sidebar-accent transition-colors"
+                  onClick={() => handleDownload(f.name)}
+                >
+                  <Download className="h-4 w-4" />
+                </button>
               </li>
             ))}
           </ul>

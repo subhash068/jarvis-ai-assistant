@@ -16,6 +16,7 @@ class ChatRequest(BaseModel):
     user_id: int
     thread_id: Optional[int] = None
     message: str
+    web_search: Optional[bool] = False
 
 class ChatResponse(BaseModel):
     role: str
@@ -63,7 +64,7 @@ async def send_message(request: ChatRequest, db: AsyncSession = Depends(get_db))
             formatted_history.append({"role": role, "content": msg.content})
         
         # 3. Generate real AI response
-        ai_text = await LLMService.generate_response(formatted_history, request.message)
+        ai_text = await LLMService.generate_response(formatted_history, request.message, web_search=request.web_search)
         
         # 4. Save AI response to database
         ai_msg = MessageCreate(
@@ -117,3 +118,10 @@ async def get_thread_messages(thread_id: int, db: AsyncSession = Depends(get_db)
             "created_at": m.created_at.isoformat() if m.created_at else ""
         } for m in messages
     ]
+
+@router.delete("/threads/{thread_id}")
+async def delete_thread(thread_id: int, db: AsyncSession = Depends(get_db)):
+    success = await ThreadService.delete_thread(db, thread_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    return {"status": "success"}

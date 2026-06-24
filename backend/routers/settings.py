@@ -14,12 +14,12 @@ class UserSettingsResponse(BaseModel):
     id: int
     username: str
     email: str
-    plan: str
-    assistant_voice: str
-    preferred_language: str
-    notifications_enabled: int
-    two_factor_auth: int
-    memory_privacy: int
+    plan: Optional[str] = None
+    assistant_voice: Optional[str] = None
+    preferred_language: Optional[str] = None
+    notifications_enabled: Optional[int] = None
+    two_factor_auth: Optional[int] = None
+    memory_privacy: Optional[int] = None
 
 @router.get("/{user_id}", response_model=UserSettingsResponse)
 async def get_settings(user_id: int, db: AsyncSession = Depends(get_db)):

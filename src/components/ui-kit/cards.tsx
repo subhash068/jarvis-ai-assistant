@@ -6,10 +6,12 @@ export function GlassCard({
   children,
   className,
   delay = 0,
+  onClick,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
+  onClick?: () => void;
 }) {
   return (
     <motion.div
@@ -17,6 +19,7 @@ export function GlassCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay, ease: "easeOut" }}
       className={cn("glass rounded-2xl p-5", className)}
+      onClick={onClick}
     >
       {children}
     </motion.div>
