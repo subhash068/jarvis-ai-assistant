@@ -10,6 +10,7 @@ export default defineConfig({
   vite: {
     server: {
       port: 5173,
+      allowedHosts: ["prelude-ultimate-scruffy.ngrok-free.dev"],
     },
   },
   tanstackStart: {

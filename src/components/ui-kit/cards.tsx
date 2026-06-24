@@ -60,10 +60,13 @@ export function StatCard({
   );
 }
 
-export function SectionHeader({ title, action }: { title: string; action?: ReactNode }) {
+export function SectionHeader({ title, action, icon }: { title: string; action?: ReactNode; icon?: ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+      <div className="flex items-center gap-2">
+        {icon}
+        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+      </div>
       {action}
     </div>
   );

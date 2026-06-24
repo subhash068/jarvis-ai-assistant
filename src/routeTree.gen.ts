@@ -19,6 +19,7 @@ import { Route as ProductivityRouteImport } from './routes/productivity'
 import { Route as PcAutomationRouteImport } from './routes/pc-automation'
 import { Route as McpPluginsRouteImport } from './routes/mcp-plugins'
 import { Route as ImageGenerationRouteImport } from './routes/image-generation'
+import { Route as DoctorAssistantRouteImport } from './routes/doctor-assistant'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrowserRouteImport } from './routes/browser'
@@ -75,6 +76,11 @@ const ImageGenerationRoute = ImageGenerationRouteImport.update({
   path: '/image-generation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DoctorAssistantRoute = DoctorAssistantRouteImport.update({
+  id: '/doctor-assistant',
+  path: '/doctor-assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CodingRoute = CodingRouteImport.update({
   id: '/coding',
   path: '/coding',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
+  '/doctor-assistant': typeof DoctorAssistantRoute
   '/image-generation': typeof ImageGenerationRoute
   '/mcp-plugins': typeof McpPluginsRoute
   '/pc-automation': typeof PcAutomationRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
+  '/doctor-assistant': typeof DoctorAssistantRoute
   '/image-generation': typeof ImageGenerationRoute
   '/mcp-plugins': typeof McpPluginsRoute
   '/pc-automation': typeof PcAutomationRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
+  '/doctor-assistant': typeof DoctorAssistantRoute
   '/image-generation': typeof ImageGenerationRoute
   '/mcp-plugins': typeof McpPluginsRoute
   '/pc-automation': typeof PcAutomationRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/browser'
     | '/chat'
     | '/coding'
+    | '/doctor-assistant'
     | '/image-generation'
     | '/mcp-plugins'
     | '/pc-automation'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/browser'
     | '/chat'
     | '/coding'
+    | '/doctor-assistant'
     | '/image-generation'
     | '/mcp-plugins'
     | '/pc-automation'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/browser'
     | '/chat'
     | '/coding'
+    | '/doctor-assistant'
     | '/image-generation'
     | '/mcp-plugins'
     | '/pc-automation'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   BrowserRoute: typeof BrowserRoute
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
+  DoctorAssistantRoute: typeof DoctorAssistantRoute
   ImageGenerationRoute: typeof ImageGenerationRoute
   McpPluginsRoute: typeof McpPluginsRoute
   PcAutomationRoute: typeof PcAutomationRoute
@@ -297,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImageGenerationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/doctor-assistant': {
+      id: '/doctor-assistant'
+      path: '/doctor-assistant'
+      fullPath: '/doctor-assistant'
+      preLoaderRoute: typeof DoctorAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coding': {
       id: '/coding'
       path: '/coding'
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrowserRoute: BrowserRoute,
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
+  DoctorAssistantRoute: DoctorAssistantRoute,
   ImageGenerationRoute: ImageGenerationRoute,
   McpPluginsRoute: McpPluginsRoute,
   PcAutomationRoute: PcAutomationRoute,

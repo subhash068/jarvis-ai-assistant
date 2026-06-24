@@ -2,13 +2,14 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Mic, MessageSquare, Brain, Bot, Cpu, Code2,
-  Eye, Globe, Monitor, Search, CalendarCheck, Sparkles, BarChart3, Settings, PlaySquare, Image, Server, Menu, X
+  Eye, Globe, Monitor, Search, CalendarCheck, Sparkles, BarChart3, Settings, PlaySquare, Image, Server, Menu, X, Stethoscope
 } from "lucide-react";
 import React, { useState, type ReactNode } from "react";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/voice", label: "Voice", icon: Mic },
+  { to: "/doctor-assistant", label: "Doctor Assistant", icon: Stethoscope },
   { to: "/chat", label: "Chat", icon: MessageSquare },
   { to: "/automation", label: "Automation", icon: Cpu },
   { to: "/browser", label: "Browser", icon: Globe },

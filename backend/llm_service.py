@@ -386,3 +386,22 @@ class LLMService:
         except Exception as e:
             print(f"Playwright generation error: {e}")
             return f"// Failed to generate test: {str(e)}"
+
+    @staticmethod
+    async def summarize_medical_conversation(transcription: str) -> str:
+        messages = [
+            {"role": "system", "content": "You are a professional medical assistant. Analyze the following transcript of a doctor-patient conversation and provide a concise medical summary. Include Chief Complaint, History of Present Illness, Assessment, and Plan if applicable."},
+            {"role": "user", "content": f"Transcript:\n{transcription}\n\nPlease generate the summary."}
+        ]
+        try:
+            response = await client.chat.completions.create(
+                model=MODELS["reasoning"],
+                messages=messages,
+                temperature=0.3,
+                max_tokens=1500
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"Summarization error: {e}")
+            return f"Failed to generate summary: {str(e)}"
+
