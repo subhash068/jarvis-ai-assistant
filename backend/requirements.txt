@@ -17,4 +17,4 @@ keyboard
 pyautogui
 keyboard
 websockets
-pdfjs-dist
+mcp>=1.0.0

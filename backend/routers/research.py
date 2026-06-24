@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import List
 from database import get_db
 from models import ResearchReport, ResearchFinding
-from llm_service import client, MODEL_NAME
+from llm_service import client, MODELS
 from search_service import SearchService
 
 router = APIRouter(
@@ -67,7 +67,7 @@ async def generate_report(req: GenerateRequest, db: AsyncSession = Depends(get_d
         user_prompt = f"Topic: {req.topic}\n\nWeb Search Context:\n{context}\n\nCreate a comprehensive research report on this topic."
         
         response = await client.chat.completions.create(
-            model=MODEL_NAME,
+            model=MODELS["reasoning"],
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -90,7 +90,7 @@ async def generate_report(req: GenerateRequest, db: AsyncSession = Depends(get_d
         # Generate and save a key finding from this report
         finding_prompt = f"Based on this research report, extract exactly one short key finding bullet point (max 15 words):\n{report_content}"
         finding_res = await client.chat.completions.create(
-            model=MODEL_NAME,
+            model=MODELS["reasoning"],
             messages=[{"role": "user", "content": finding_prompt}],
             temperature=0.5,
             max_tokens=40

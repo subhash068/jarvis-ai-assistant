@@ -1,0 +1,14 @@
+agent ResearchAgent {
+    task research(topic) {
+        return ai.chat("Explain " + topic)
+    }
+}
+
+let result = ResearchAgent.research("Machine Learning")
+print(result)
+
+let weather = tool.weather("Hyderabad")
+print(weather)
+
+memory.save("user_name", "Devendra")
+print(memory.get("user_name"))

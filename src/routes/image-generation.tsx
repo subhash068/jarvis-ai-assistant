@@ -14,48 +14,47 @@ export const Route = createFileRoute("/image-generation")({
   component: ImageGenerationPage,
 });
 
-import puter from "@heyputer/puter.js";
-
 function ImageGenerationPage() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() || isGenerating) return;
-
-
 
     setIsGenerating(true);
     setError(null);
 
     try {
-      // Ensure the user is signed in to Puter to avoid 401 Unauthorized errors
-      if (!puter.auth.isSignedIn()) {
-        await puter.auth.signIn();
-      }
-
-      // puter.ai.txt2img returns an HTMLImageElement
-      const imageElement = await puter.ai.txt2img(prompt);
+      // Use pollinations.ai for free, fast, no-auth image generation
+      const seed = Math.floor(Math.random() * 100000);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&seed=${seed}`;
       
-      // We extract the src to use it in our own React img tag
-      if (imageElement && imageElement.src) {
-        setGeneratedImages(prev => [imageElement.src, ...prev]);
-      } else {
+      // Preload the image so we don't show a broken image icon while it generates/downloads
+      const img = new Image();
+      img.onload = () => {
+        setGeneratedImages(prev => [imageUrl, ...prev]);
+        setIsGenerating(false);
+      };
+      img.onerror = () => {
         setError("Received an invalid response from the image generator.");
-      }
+        setIsGenerating(false);
+      };
+      img.src = imageUrl;
+
     } catch (err: any) {
       console.error("Image generation failed:", err);
       setError(err.message || "Failed to generate image. Please try again.");
-    } finally {
       setIsGenerating(false);
     }
   };
 
   return (
-    <AppShell title="Image Generation" subtitle="Visualize your ideas with Puter AI.">
+    <AppShell title="Image Generation" subtitle="Visualize your ideas instantly.">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-1 flex flex-col gap-5">
           <GlassCard>
@@ -108,7 +107,7 @@ function ImageGenerationPage() {
                 <span className="text-primary">•</span> Add styles like "oil painting", "digital art", or "photorealistic".
               </li>
               <li className="flex gap-2">
-                <span className="text-primary">•</span> This uses Puter.js, no API keys required!
+                <span className="text-primary">•</span> No API keys or accounts required!
               </li>
             </ul>
           </GlassCard>
@@ -132,16 +131,23 @@ function ImageGenerationPage() {
                     </div>
                   )}
                   {generatedImages.map((src, idx) => (
-                    <div key={idx} className="group relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black/50">
+                    <div 
+                      key={idx} 
+                      className="group relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black/50 cursor-pointer"
+                      onClick={() => setSelectedImage(src)}
+                    >
                       <img 
                         src={src} 
-                        alt="Generated via Puter AI" 
+                        alt="Generated AI Art" 
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-4">
                         <a 
                           href={src} 
                           download={`jarvis-generation-${idx}.png`}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="p-2 rounded-full glass hover:bg-white/20 transition-colors text-white"
                           title="Download Image"
                         >
@@ -156,6 +162,43 @@ function ImageGenerationPage() {
           </GlassCard>
         </div>
       </div>
+      
+      {/* Full-screen Image Popup Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center rounded-xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className="absolute top-4 right-4 z-10 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors"
+              onClick={() => setSelectedImage(null)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Generated Full View" 
+              className="w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+            />
+            <div className="absolute bottom-4 right-4">
+              <a 
+                href={selectedImage} 
+                download="jarvis-generation.png"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-lg transition-colors font-medium text-sm"
+              >
+                <Download className="h-4 w-4" />
+                Download
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

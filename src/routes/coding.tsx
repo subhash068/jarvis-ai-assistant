@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/AppShell";
 import { GlassCard, SectionHeader } from "@/components/ui-kit/cards";
-import { Code2, Bug, ClipboardList, Database, Server, Play, Loader2 } from "lucide-react";
+import { Code2, Bug, ClipboardList, Database, Server, Play, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState, useEffect } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export const Route = createFileRoute("/coding")({
   head: () => ({
@@ -23,11 +25,22 @@ const iconMap: Record<string, any> = {
   Database,
 };
 
+const getPrismLanguage = (lang?: string) => {
+  if (!lang) return "javascript";
+  const l = lang.toLowerCase();
+  if (l === "c++") return "cpp";
+  if (l === "c#") return "csharp";
+  if (l === "html" || l === "xml") return "markup";
+  if (l === "react") return "jsx";
+  return l;
+};
+
 function CodingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTool, setSelectedTool] = useState<any>(null);
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: tools = [] } = useQuery({
@@ -87,7 +100,20 @@ function CodingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* SIDEBAR: TOOLS LIST */}
-        <div className="lg:col-span-3 space-y-3">
+        <div className={`${isSidebarCollapsed ? "lg:col-span-1" : "lg:col-span-3"} space-y-3 lg:sticky lg:top-24 self-start transition-all duration-300`}>
+          <div className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between px-2"} mb-4`}>
+            {!isSidebarCollapsed && (
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Engine Tools</span>
+            )}
+            <button 
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground transition-colors"
+              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isSidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </button>
+          </div>
+          
           {tools.map((t: any) => {
             const Icon = iconMap[t.icon] || Code2;
             const isActive = selectedTool?.name === t.name;
@@ -95,26 +121,29 @@ function CodingPage() {
               <button
                 key={t.name}
                 onClick={() => setSelectedTool(t)}
-                className={`w-full text-left p-4 rounded-xl transition-all duration-200 border flex items-start gap-4 ${
+                className={`w-full text-left p-3 rounded-xl transition-all duration-200 border flex ${isSidebarCollapsed ? "justify-center" : "items-start gap-3"} ${
                   isActive 
                     ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(var(--primary),0.1)]" 
                     : "glass border-transparent hover:border-primary/20 hover:bg-white/5"
                 }`}
+                title={isSidebarCollapsed ? t.name : undefined}
               >
-                <div className={`h-10 w-10 rounded-lg grid place-items-center shrink-0 transition-colors ${isActive ? "gradient-primary text-primary-foreground shadow-glow" : "bg-white/5 text-muted-foreground"}`}>
-                  <Icon className="h-5 w-5" />
+                <div className={`h-8 w-8 rounded-lg grid place-items-center shrink-0 transition-colors ${isActive ? "gradient-primary text-primary-foreground shadow-glow" : "bg-white/5 text-muted-foreground"}`}>
+                  <Icon className="h-4 w-4" />
                 </div>
-                <div>
-                  <div className={`font-semibold text-sm ${isActive ? "text-primary" : "text-foreground"}`}>{t.name}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">{t.desc}</div>
-                </div>
+                {!isSidebarCollapsed && (
+                  <div className="overflow-hidden">
+                    <div className={`font-semibold text-sm ${isActive ? "text-primary" : "text-foreground"} truncate`}>{t.name}</div>
+                    <div className="text-[12px] text-muted-foreground line-clamp-1 leading-relaxed">{t.desc}</div>
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
 
         {/* MAIN WORKSPACE */}
-        <div className="lg:col-span-9 flex flex-col gap-6">
+        <div className={`${isSidebarCollapsed ? "lg:col-span-11" : "lg:col-span-9"} flex flex-col gap-6 transition-all duration-300`}>
           
           {/* Prompt Area */}
           <GlassCard className="p-0 overflow-hidden border-primary/20">
@@ -154,16 +183,32 @@ function CodingPage() {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
             <GlassCard>
               <SectionHeader title={isLoading ? "Generating..." : snippetData?.title || "Loading..."} action={<span className="text-[11px] text-muted-foreground">{snippetData?.language || ""}</span>} />
-              <pre className="rounded-xl bg-background/60 border border-border p-4 text-xs leading-relaxed overflow-x-auto font-mono text-foreground/90 relative min-h-[300px]">
+              <div className="rounded-xl overflow-hidden border border-border min-h-[300px] relative">
                 {isLoading ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground bg-background/60 z-10">
                     <Loader2 className="h-8 w-8 animate-spin mb-4 text-primary" />
                     <span>Jarvis is writing code...</span>
                   </div>
+                ) : snippetData?.code ? (
+                  <SyntaxHighlighter
+                    language={getPrismLanguage(snippetData.language)}
+                    style={vscDarkPlus}
+                    customStyle={{
+                      margin: 0,
+                      padding: "1rem",
+                      background: "rgba(0,0,0,0.3)",
+                      fontSize: "0.75rem",
+                      minHeight: "300px",
+                    }}
+                  >
+                    {snippetData.code}
+                  </SyntaxHighlighter>
                 ) : (
-                  snippetData?.code || "Loading..."
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-xs bg-background/60">
+                    No code generated yet.
+                  </div>
                 )}
-              </pre>
+              </div>
             </GlassCard>
             <GlassCard>
               <SectionHeader title="Explanation" />

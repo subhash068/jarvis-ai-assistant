@@ -18,9 +18,15 @@ client = AsyncOpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
-# You can change this to "llama-3.3-70b-versatile" for better reasoning
-# or "llama-3.1-8b-instant" for absolute lowest latency.
-MODEL_NAME = "llama-3.1-8b-instant"
+# Configured Models by Capability / Sector (All Free via Groq)
+MODELS = {
+    "fast": "llama-3.1-8b-instant",               # Routing, intent extraction
+    "reasoning": "llama-3.3-70b-versatile",       # General reasoning, logical tasks
+    "coding": "llama-3.3-70b-versatile",          # Specialized for code generation
+    "deep_thought": "deepseek-r1-distill-llama-70b", # Math, complex logic, deep reasoning
+    "creative": "gemma2-9b-it",                   # Creative writing, brainstorming
+    "vision": "llama-3.2-11b-vision-preview",     # Image and vision tasks
+}
 
 SYSTEM_PROMPT = """You are Jarvis, a highly intelligent, concise, and helpful AI assistant.
 Your responses should be brief, direct, and conversational. Do not use overly long paragraphs.
@@ -107,7 +113,7 @@ class LLMService:
         
         try:
             response = await client.chat.completions.create(
-                model=MODEL_NAME,
+                model=MODELS["fast"],
                 messages=messages,
                 temperature=0.7,
                 max_tokens=250
@@ -129,7 +135,7 @@ class LLMService:
             # We use a slightly larger model for better extraction accuracy if needed, 
             # but llama-3.1-8b-instant usually handles basic JSON extraction well.
             response = await client.chat.completions.create(
-                model=MODEL_NAME,
+                model=MODELS["fast"],
                 messages=messages,
                 tools=extraction_tools,
                 tool_choice={"type": "function", "function": {"name": "extract_intent_and_entities"}}
@@ -158,7 +164,7 @@ class LLMService:
             ]
             try:
                 response = await client.chat.completions.create(
-                    model=MODEL_NAME,
+                    model=MODELS["reasoning"],
                     messages=messages,
                     temperature=0.4
                 )
@@ -215,7 +221,7 @@ class LLMService:
             ]
             try:
                 response = await client.chat.completions.create(
-                    model=MODEL_NAME,
+                    model=MODELS["reasoning"],
                     messages=messages,
                     temperature=0.3
                 )
@@ -249,13 +255,78 @@ class LLMService:
             messages.append({"role": "user", "content": new_message})
             
             try:
-                response = await client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=250
-                )
-                return response.choices[0].message.content
+                from mcp_service import mcp_client
+                mcp_tools_raw = await mcp_client.get_tools()
+                mcp_openai_tools = []
+                for t in mcp_tools_raw:
+                    mcp_openai_tools.append({
+                        "type": "function",
+                        "function": {
+                            "name": t.name,
+                            "description": t.description or "",
+                            "parameters": t.inputSchema or {}
+                        }
+                    })
+
+                kwargs = {
+                    "model": MODELS["reasoning"],
+                    "messages": messages,
+                    "temperature": 0.7,
+                    "max_tokens": 1024
+                }
+                
+                if mcp_openai_tools:
+                    kwargs["tools"] = mcp_openai_tools
+                    kwargs["tool_choice"] = "auto"
+                
+                response = await client.chat.completions.create(**kwargs)
+                response_message = response.choices[0].message
+                
+                if response_message.tool_calls:
+                    # Append the assistant's tool call message
+                    tool_calls_data = []
+                    for tc in response_message.tool_calls:
+                        tool_calls_data.append({
+                            "id": tc.id,
+                            "type": "function",
+                            "function": {
+                                "name": tc.function.name,
+                                "arguments": tc.function.arguments
+                            }
+                        })
+                    
+                    messages.append({
+                        "role": "assistant",
+                        "content": response_message.content,
+                        "tool_calls": tool_calls_data
+                    })
+
+                    for tool_call in response_message.tool_calls:
+                        name = tool_call.function.name
+                        try:
+                            args = json.loads(tool_call.function.arguments)
+                        except:
+                            args = {}
+                        print(f"Executing MCP Tool: {name} with args {args}")
+                        tool_result = await mcp_client.execute_tool(name, args)
+                        
+                        messages.append({
+                            "role": "tool",
+                            "name": name,
+                            "tool_call_id": tool_call.id,
+                            "content": str(tool_result)
+                        })
+                    
+                    final_response = await client.chat.completions.create(
+                        model=MODELS["reasoning"],
+                        messages=messages,
+                        temperature=0.7,
+                        max_tokens=1024
+                    )
+                    return final_response.choices[0].message.content
+                else:
+                    return response_message.content
+                
             except Exception as e:
                 print(f"Error calling LLM: {e}")
                 return "I'm sorry, my language core is experiencing interference. I couldn't process that request."
@@ -269,7 +340,7 @@ class LLMService:
         ]
         try:
             response = await client.chat.completions.create(
-                model=MODEL_NAME,
+                model=MODELS["coding"],
                 messages=messages,
                 response_format={"type": "json_object"},
                 temperature=0.3,
@@ -300,7 +371,7 @@ class LLMService:
         ]
         try:
             response = await client.chat.completions.create(
-                model=MODEL_NAME,
+                model=MODELS["reasoning"],
                 messages=messages,
                 temperature=0.2,
                 max_tokens=3000

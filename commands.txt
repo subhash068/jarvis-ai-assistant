@@ -8,6 +8,15 @@ fastapi dev main.py
 
 
 
+//image generation prompts
+a hyper-realistic penguin wearing a neon pink spacesuit eating a slice of pizza on Mars
+A vintage 1950s robot serving cocktails on a spaceship
+A bioluminescent jellyfish floating through a nebula
+A cat riding a Roomba through a library 
+An astronaut sleeping on a cloud made of cotton candy
+A slice of pizza floating in space with a bite taken out of it
+
+
 
 
 

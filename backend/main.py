@@ -9,7 +9,7 @@ if venv_path not in sys.path:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import chat, memory, settings, analytics, agents, productivity, research, automation, coding, vision, voice, testing
+from routers import chat, memory, settings, analytics, agents, productivity, research, automation, coding, vision, voice, testing, mcp
 
 app = FastAPI(
     title="Jarvis AI Assistant API",
@@ -29,6 +29,7 @@ app.include_router(coding.router)
 app.include_router(vision.router)
 app.include_router(voice.router)
 app.include_router(testing.router)
+app.include_router(mcp.router)
 
 from fastapi.staticfiles import StaticFiles
 playwright_report_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "playwright-engine", "playwright-report"))

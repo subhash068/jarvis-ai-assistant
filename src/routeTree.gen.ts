@@ -17,6 +17,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResearchRouteImport } from './routes/research'
 import { Route as ProductivityRouteImport } from './routes/productivity'
 import { Route as PcAutomationRouteImport } from './routes/pc-automation'
+import { Route as McpPluginsRouteImport } from './routes/mcp-plugins'
 import { Route as ImageGenerationRouteImport } from './routes/image-generation'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -64,6 +65,11 @@ const PcAutomationRoute = PcAutomationRouteImport.update({
   path: '/pc-automation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpPluginsRoute = McpPluginsRouteImport.update({
+  id: '/mcp-plugins',
+  path: '/mcp-plugins',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImageGenerationRoute = ImageGenerationRouteImport.update({
   id: '/image-generation',
   path: '/image-generation',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/image-generation': typeof ImageGenerationRoute
+  '/mcp-plugins': typeof McpPluginsRoute
   '/pc-automation': typeof PcAutomationRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/image-generation': typeof ImageGenerationRoute
+  '/mcp-plugins': typeof McpPluginsRoute
   '/pc-automation': typeof PcAutomationRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
   '/image-generation': typeof ImageGenerationRoute
+  '/mcp-plugins': typeof McpPluginsRoute
   '/pc-automation': typeof PcAutomationRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/image-generation'
+    | '/mcp-plugins'
     | '/pc-automation'
     | '/productivity'
     | '/research'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/image-generation'
+    | '/mcp-plugins'
     | '/pc-automation'
     | '/productivity'
     | '/research'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/coding'
     | '/image-generation'
+    | '/mcp-plugins'
     | '/pc-automation'
     | '/productivity'
     | '/research'
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
   ImageGenerationRoute: typeof ImageGenerationRoute
+  McpPluginsRoute: typeof McpPluginsRoute
   PcAutomationRoute: typeof PcAutomationRoute
   ProductivityRoute: typeof ProductivityRoute
   ResearchRoute: typeof ResearchRoute
@@ -270,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PcAutomationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp-plugins': {
+      id: '/mcp-plugins'
+      path: '/mcp-plugins'
+      fullPath: '/mcp-plugins'
+      preLoaderRoute: typeof McpPluginsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/image-generation': {
       id: '/image-generation'
       path: '/image-generation'
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
   ImageGenerationRoute: ImageGenerationRoute,
+  McpPluginsRoute: McpPluginsRoute,
   PcAutomationRoute: PcAutomationRoute,
   ProductivityRoute: ProductivityRoute,
   ResearchRoute: ResearchRoute,

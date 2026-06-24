@@ -72,7 +72,7 @@ class AutomationService:
         except ImportError:
             return "Playwright is not installed due to disk space limits. Please clear some space and run 'pip install playwright'."
 
-        from llm_service import client, MODEL_NAME
+        from llm_service import client, MODELS
         import tempfile
         import os
         import subprocess
@@ -106,7 +106,7 @@ class AutomationService:
         
         try:
             response = await client.chat.completions.create(
-                model=MODEL_NAME,
+                model=MODELS["reasoning"],
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.2
             )
@@ -162,7 +162,7 @@ class AutomationService:
         except ImportError:
             return "PyAutoGUI is not installed. Please run 'pip install pyautogui keyboard' to enable PC control."
 
-        from llm_service import client, MODEL_NAME
+        from llm_service import client, MODELS
         import tempfile
         import os
         import subprocess
@@ -193,7 +193,7 @@ class AutomationService:
         
         try:
             response = await client.chat.completions.create(
-                model=MODEL_NAME,
+                model=MODELS["reasoning"],
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.2
             )

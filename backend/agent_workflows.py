@@ -1,6 +1,6 @@
 from typing import TypedDict, List
 from langgraph.graph import StateGraph, END
-from llm_service import client, MODEL_NAME
+from llm_service import client, MODELS
 import json
 
 class AgentState(TypedDict):
@@ -22,7 +22,7 @@ Format the response ONLY as a JSON object with keys:
 
     try:
         response = await client.chat.completions.create(
-            model=MODEL_NAME,
+            model=MODELS["reasoning"],
             messages=[
                 {"role": "system", "content": "You are a planning coordinator. Respond in raw JSON."},
                 {"role": "user", "content": prompt}
@@ -57,7 +57,7 @@ async def research_node(state: AgentState) -> dict:
     
     try:
         response = await client.chat.completions.create(
-            model=MODEL_NAME,
+            model=MODELS["reasoning"],
             messages=[
                 {"role": "system", "content": "You are a research agent. Extract key points briefly."},
                 {"role": "user", "content": prompt}
@@ -85,7 +85,7 @@ async def synthesis_node(state: AgentState) -> dict:
 
     try:
         response = await client.chat.completions.create(
-            model=MODEL_NAME,
+            model=MODELS["reasoning"],
             messages=[
                 {"role": "system", "content": "You are the Jarvis master coordinator. Combine findings into a concise, professional answer."},
                 {"role": "user", "content": prompt}
