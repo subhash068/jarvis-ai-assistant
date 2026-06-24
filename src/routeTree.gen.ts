@@ -24,7 +24,6 @@ import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrowserRouteImport } from './routes/browser'
 import { Route as AutomationRouteImport } from './routes/automation'
-import { Route as IndexRouteImport } from './routes/index'
 
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
@@ -101,14 +100,8 @@ const AutomationRoute = AutomationRouteImport.update({
   path: '/automation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/automation': typeof AutomationRoute
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
@@ -126,7 +119,6 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/automation': typeof AutomationRoute
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
@@ -145,7 +137,6 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/automation': typeof AutomationRoute
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
@@ -165,7 +156,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/automation'
     | '/browser'
     | '/chat'
@@ -183,7 +173,6 @@ export interface FileRouteTypes {
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/automation'
     | '/browser'
     | '/chat'
@@ -201,7 +190,6 @@ export interface FileRouteTypes {
     | '/voice'
   id:
     | '__root__'
-    | '/'
     | '/automation'
     | '/browser'
     | '/chat'
@@ -220,7 +208,6 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AutomationRoute: typeof AutomationRoute
   BrowserRoute: typeof BrowserRoute
   ChatRoute: typeof ChatRoute
@@ -345,18 +332,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AutomationRoute: AutomationRoute,
   BrowserRoute: BrowserRoute,
   ChatRoute: ChatRoute,

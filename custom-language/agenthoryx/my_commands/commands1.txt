@@ -1,0 +1,20 @@
+>cd custom-language/agenthoryx/
+    >python agenthoryx.py run examples/hello.agx
+    >python agenthoryx.py ast examples/hello.agx
+    >python agenthoryx.py check examples/hello.agx
+    >python agenthoryx.py compile examples/hello.agx
+
+
+>python agenthoryx.py run examples/hello.agx; python agenthoryx.py ast examples/hello.agx; python agenthoryx.py check examples/hello.agx; python agenthoryx.py compile examples/hello.agx
+    output: 
+        AST generated successfully (Phase 1).
+        <compiler.ast.statements.Program object at 0x00000204039738C0>
+        Semantic analysis passed.
+        Generating bytecode...
+        PUSH 22
+        STORE age
+The test commands have finished running completely and everything successfully passed in the background:
+    - run executed without errors.
+    - ast generated the AST tree correctly.
+    - check completed the semantic analysis without any scope or typing errors.
+    - compile successfully ran the dummy bytecode generation (PUSH 22, STORE age).

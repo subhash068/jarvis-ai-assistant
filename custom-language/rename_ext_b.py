@@ -1,0 +1,51 @@
+import os
+import re
+
+def replace_in_file(filepath):
+    # skip self
+    if os.path.basename(filepath) in ('rename.py', 'rename_ext.py', 'rename_ext_b.py'):
+        return
+    
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except Exception as e:
+        return
+
+    new_content = content
+    # Replacements
+    new_content = re.sub(r'\.cxb', '.axb', new_content)
+    
+    if new_content != content:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        print(f"Updated content in {filepath}")
+
+def rename_files_and_directories(root_dir):
+    skip_dirs = {'.git', 'node_modules', '.lovable', 'dist', '.tanstack'}
+    
+    # Rename contents first
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # modify dirnames in-place to skip
+        dirnames[:] = [d for d in dirnames if d not in skip_dirs]
+        for filename in filenames:
+            filepath = os.path.join(dirpath, filename)
+            replace_in_file(filepath)
+            
+    # Rename files and directories bottom-up
+    for dirpath, dirnames, filenames in os.walk(root_dir, topdown=False):
+        if any(skip in dirpath.split(os.sep) for skip in skip_dirs):
+            continue
+
+        for filename in filenames:
+            if filename in ('rename.py', 'rename_ext.py', 'rename_ext_b.py'):
+                continue
+            if filename.endswith('.cxb'):
+                new_name = filename[:-4] + '.axb'
+                old_path = os.path.join(dirpath, filename)
+                new_path = os.path.join(dirpath, new_name)
+                os.rename(old_path, new_path)
+                print(f"Renamed file {old_path} -> {new_path}")
+                
+if __name__ == "__main__":
+    rename_files_and_directories(r"c:\Users\windows-11\Desktop\jarvis-ai-assistant\custom-language")

@@ -1,0 +1,2 @@
+python agenthoryx.py compile test.agx
+python agenthoryx.py vm test.axb
