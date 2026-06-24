@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 venv
-
+/custom-language/agenthoryx-the-ai-native-language
 node_modules
 dist
 dist-ssr
