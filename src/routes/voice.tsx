@@ -37,7 +37,7 @@ function VoicePage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/voice/stream");
+    const ws = new WebSocket((window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host + "/api/voice/stream");
     wsRef.current = ws;
 
     ws.onmessage = (event) => {

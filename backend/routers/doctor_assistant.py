@@ -4,7 +4,10 @@ import json
 import base64
 import os
 from datetime import datetime
+from sqlalchemy import select
 from llm_service import LLMService
+from database import AsyncSessionLocal
+from models import Consultation
 
 router = APIRouter(
     prefix="/doctor_assistant",
@@ -99,9 +102,40 @@ async def doctor_assistant_stream(websocket: WebSocket):
                         "audio_file": filename
                     }))
                     
+                    # Save consultation to database
+                    async with AsyncSessionLocal() as session:
+                        new_consultation = Consultation(
+                            user_id=1,  # Hardcoded for now
+                            audio_file_path=filename,
+                            transcription=transcription,
+                            summary=summary
+                        )
+                        session.add(new_consultation)
+                        await session.commit()
+                        
                     audio_buffer.clear()
                     
     except WebSocketDisconnect:
         pass
     except Exception as e:
         print(f"Doctor Assistant WebSocket Error: {e}")
+
+@router.get("/consultations")
+async def get_consultations(user_id: int = 1):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(Consultation)
+            .where(Consultation.user_id == user_id)
+            .order_by(Consultation.created_at.desc())
+        )
+        consultations = result.scalars().all()
+        return [
+            {
+                "id": c.id,
+                "audio_file_path": c.audio_file_path,
+                "transcription": c.transcription,
+                "summary": c.summary,
+                "created_at": c.created_at.isoformat() if c.created_at else None
+            }
+            for c in consultations
+        ]

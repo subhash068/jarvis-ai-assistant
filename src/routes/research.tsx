@@ -32,7 +32,7 @@ function ResearchPage() {
   const { data: reports = [], isLoading: isLoadingReports } = useQuery({
     queryKey: ["reports"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/research/reports?user_id=1");
+      const res = await fetch("/api/research/reports?user_id=1");
       if (!res.ok) throw new Error("Failed to fetch reports");
       return res.json();
     },
@@ -42,7 +42,7 @@ function ResearchPage() {
   const { data: findings = [], isLoading: isLoadingFindings } = useQuery({
     queryKey: ["findings"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/research/findings?user_id=1");
+      const res = await fetch("/api/research/findings?user_id=1");
       if (!res.ok) throw new Error("Failed to fetch findings");
       return res.json();
     },
@@ -51,7 +51,7 @@ function ResearchPage() {
   // Generate research report mutation
   const generateReportMutation = useMutation({
     mutationFn: async (topicText: string) => {
-      const res = await fetch("http://localhost:8000/research/generate", {
+      const res = await fetch("/api/research/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: topicText, user_id: 1 }),

@@ -38,7 +38,7 @@ function SettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["settings"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/settings/1");
+      const res = await fetch("/api/settings/1");
       if (!res.ok) throw new Error("Failed to fetch settings");
       return res.json();
     },
@@ -47,7 +47,7 @@ function SettingsPage() {
   // Mutation to update settings
   const updateSettingsMutation = useMutation({
     mutationFn: async (updatedFields: any) => {
-      const res = await fetch("http://localhost:8000/settings/1", {
+      const res = await fetch("/api/settings/1", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -76,7 +76,7 @@ function MCPPluginsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["mcp-plugins"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/mcp/");
+      const res = await fetch("/api/mcp/");
       if (!res.ok) throw new Error("Failed to fetch plugins");
       return res.json();
     },
@@ -84,7 +84,7 @@ function MCPPluginsPage() {
 
   const addMutation = useMutation({
     mutationFn: async (payload: { name: string, command: string, args: string[], env: Record<string, string> }) => {
-      const res = await fetch("http://localhost:8000/mcp/", {
+      const res = await fetch("/api/mcp/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

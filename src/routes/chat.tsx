@@ -91,7 +91,7 @@ function ChatPage() {
   const { data: threads = [], isLoading: isLoadingThreads } = useQuery({
     queryKey: ["threads"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/chat/threads/1");
+      const res = await fetch("/api/chat/threads/1");
       if (!res.ok) throw new Error("Failed to fetch threads");
       return res.json();
     },
@@ -109,7 +109,7 @@ function ChatPage() {
     queryKey: ["messages", activeThreadId],
     queryFn: async () => {
       if (!activeThreadId) return [];
-      const res = await fetch(`http://localhost:8000/chat/threads/${activeThreadId}/messages`);
+      const res = await fetch(`/api/chat/threads/${activeThreadId}/messages`);
       if (!res.ok) throw new Error("Failed to fetch messages");
       return res.json();
     },
@@ -126,7 +126,7 @@ function ChatPage() {
 
   const sendMessageMutation = useMutation({
     mutationFn: async ({ text, webSearch }: { text: string; webSearch: boolean }) => {
-      const res = await fetch("http://localhost:8000/chat/message", {
+      const res = await fetch("/api/chat/message", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -174,7 +174,7 @@ function ChatPage() {
 
   const deleteThreadMutation = useMutation({
     mutationFn: async (threadId: number) => {
-      const res = await fetch(`http://localhost:8000/chat/threads/${threadId}`, {
+      const res = await fetch(`/api/chat/threads/${threadId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete thread");

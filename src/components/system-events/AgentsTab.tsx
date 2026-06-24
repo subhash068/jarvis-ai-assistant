@@ -20,7 +20,7 @@ export function AgentsTab() {
   const { data: agents = [], isLoading: isLoadingAgents } = useQuery({
     queryKey: ["agents"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/agents/");
+      const res = await fetch("/api/agents/");
       if (!res.ok) throw new Error("Failed to fetch agents");
       return res.json();
     },
@@ -37,7 +37,7 @@ export function AgentsTab() {
   const { data: logs = [], isLoading: isLoadingLogs } = useQuery({
     queryKey: ["agentLogs"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/agents/logs");
+      const res = await fetch("/api/agents/logs");
       if (!res.ok) throw new Error("Failed to fetch agent logs");
       return res.json();
     },
@@ -46,7 +46,7 @@ export function AgentsTab() {
   // Toggle agent status
   const toggleAgentMutation = useMutation({
     mutationFn: async (agentId: number) => {
-      const res = await fetch(`http://localhost:8000/agents/${agentId}/toggle`, {
+      const res = await fetch(`/api/agents/${agentId}/toggle`, {
         method: "POST",
       });
       if (!res.ok) throw new Error("Failed to toggle agent status");
@@ -60,7 +60,7 @@ export function AgentsTab() {
   // Run agent task
   const runAgentMutation = useMutation({
     mutationFn: async (data: { agent_id: number; task: string }) => {
-      const res = await fetch("http://localhost:8000/agents/run", {
+      const res = await fetch("/api/agents/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

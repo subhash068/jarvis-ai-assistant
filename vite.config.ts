@@ -11,6 +11,13 @@ export default defineConfig({
     server: {
       port: 5173,
       allowedHosts: ["prelude-ultimate-scruffy.ngrok-free.dev"],
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+          ws: true,
+        }
+      }
     },
   },
   tanstackStart: {

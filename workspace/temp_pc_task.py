@@ -1,32 +1,31 @@
-import pyautogui
-import time
-import subprocess
 import os
-import pathlib
+import subprocess
+import time
+import pyautogui
 
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 1
 
-def play_dorandar_video():
-    video_path = 'C:/Users/windows-11/Videos/Dorandar.mp4'
-    if not os.path.exists(video_path):
-        print("Video file not found")
-        return
+def open_chrome():
+    try:
+        # Open Chrome
+        chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe"
+        if os.path.exists(chrome_path):
+            subprocess.run([chrome_path])
+        else:
+            # If Chrome is not installed in the default location, try to find it in the PATH
+            subprocess.run(["start", "chrome"], shell=True)
+        
+        time.sleep(5)  # Wait for Chrome to open
+        
+        # Write the result to the file
+        with open('C:/Users/windows-11/Desktop/jarvis-ai-assistant/workspace/pc_task_result.txt', 'w') as f:
+            f.write("TASK_COMPLETED: Chrome opened successfully")
+        
+    except Exception as e:
+        # Write the error to the file
+        with open('C:/Users/windows-11/Desktop/jarvis-ai-assistant/workspace/pc_task_result.txt', 'w') as f:
+            f.write(f"TASK_FAILED: {str(e)}")
 
-    # Open video player
-    video_player_path = 'C:/Program Files/VideoLAN/VLC/vlc.exe'
-    if not os.path.exists(video_player_path):
-        print("VLC media player not found")
-        return
-
-    subprocess.run([video_player_path, video_path])
-
-    # Wait for video to start playing
-    time.sleep(5)
-
-    # Write task completion to file
-    result_file_path = 'C:/Users/windows-11/Desktop/jarvis-ai-assistant/workspace/pc_task_result.txt'
-    with open(result_file_path, 'w') as f:
-        f.write('TASK_COMPLETED: Dorandar video played successfully')
-
-play_dorandar_video()
+if __name__ == "__main__":
+    open_chrome()

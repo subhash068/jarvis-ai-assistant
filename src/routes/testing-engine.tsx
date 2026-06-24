@@ -23,7 +23,7 @@ function TestingEngine() {
   
   const testMutation = useMutation({
     mutationFn: async (data: { url?: string; browser?: string; headed?: boolean }) => {
-      const response = await fetch("http://localhost:8000/testing/run", {
+      const response = await fetch("/api/testing/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -37,7 +37,7 @@ function TestingEngine() {
 
   const codegenMutation = useMutation({
     mutationFn: async (data: { url?: string }) => {
-      const response = await fetch("http://localhost:8000/testing/codegen", {
+      const response = await fetch("/api/testing/codegen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -51,7 +51,7 @@ function TestingEngine() {
 
   const aiGenerateMutation = useMutation({
     mutationFn: async (data: { url: string; prompt: string }) => {
-      const response = await fetch("http://localhost:8000/testing/generate", {
+      const response = await fetch("/api/testing/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -208,7 +208,7 @@ function TestingEngine() {
                 {testMutation.data && (
                   <div className="flex items-center gap-3">
                     <a
-                      href="http://localhost:8000/testing/report/index.html"
+                      href="/api/testing/report/index.html"
                       target="_blank"
                       rel="noreferrer"
                       className="text-xs font-medium text-primary hover:underline flex items-center gap-1"

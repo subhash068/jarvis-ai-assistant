@@ -12,7 +12,7 @@ export function AnalyticsTab() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["analytics"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/analytics/1");
+      const res = await fetch("/api/analytics/1");
       if (!res.ok) throw new Error("Failed to fetch analytics");
       return res.json();
     },

@@ -25,7 +25,7 @@ function ProductivityPage() {
   const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/productivity/tasks?user_id=1");
+      const res = await fetch("/api/productivity/tasks?user_id=1");
       if (!res.ok) throw new Error("Failed to fetch tasks");
       return res.json();
     },
@@ -35,7 +35,7 @@ function ProductivityPage() {
   const { data: meetings = [], isLoading: isLoadingMeetings } = useQuery({
     queryKey: ["meetings"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/productivity/meetings?user_id=1");
+      const res = await fetch("/api/productivity/meetings?user_id=1");
       if (!res.ok) throw new Error("Failed to fetch meetings");
       return res.json();
     },
@@ -44,7 +44,7 @@ function ProductivityPage() {
   // Toggle task done status
   const toggleTaskMutation = useMutation({
     mutationFn: async (taskId: number) => {
-      const res = await fetch(`http://localhost:8000/productivity/tasks/${taskId}/toggle`, {
+      const res = await fetch(`/api/productivity/tasks/${taskId}/toggle`, {
         method: "PUT",
       });
       if (!res.ok) throw new Error("Failed to toggle task");
@@ -58,7 +58,7 @@ function ProductivityPage() {
   // Add task mutation
   const addTaskMutation = useMutation({
     mutationFn: async (taskData: { text: string; due: string }) => {
-      const res = await fetch("http://localhost:8000/productivity/tasks", {
+      const res = await fetch("/api/productivity/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: 1, text: taskData.text, due: taskData.due }),
@@ -75,7 +75,7 @@ function ProductivityPage() {
   // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: number) => {
-      const res = await fetch(`http://localhost:8000/productivity/tasks/${taskId}`, {
+      const res = await fetch(`/api/productivity/tasks/${taskId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete task");

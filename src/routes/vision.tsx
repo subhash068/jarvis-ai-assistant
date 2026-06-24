@@ -26,7 +26,7 @@ function VisionPage() {
   const { data: status } = useQuery({
     queryKey: ["vision", "status"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/vision/status");
+      const res = await fetch("/api/vision/status");
       if (!res.ok) throw new Error("Failed to fetch status");
       return res.json();
     },
@@ -42,7 +42,7 @@ function VisionPage() {
       // Delay connection to prevent webcam locking during React StrictMode double-renders
       timeout = setTimeout(() => {
         try {
-          ws = new WebSocket(`ws://localhost:8000/vision/stream?source=${source}`);
+          ws = new WebSocket(`${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/api/vision/stream?source=${source}`);
         
           ws.onopen = () => setWsConnected(true);
           
@@ -89,7 +89,7 @@ function VisionPage() {
 
     try {
       if (activeTab === "Image upload") {
-        const res = await fetch("http://localhost:8000/vision/upload", {
+        const res = await fetch("/api/vision/upload", {
           method: "POST",
           body: formData,
         });
@@ -100,7 +100,7 @@ function VisionPage() {
           setLiveFrame(`data:image/jpeg;base64,${data.frame}`);
         }
       } else if (activeTab === "OCR extraction") {
-        const res = await fetch("http://localhost:8000/vision/ocr", {
+        const res = await fetch("/api/vision/ocr", {
           method: "POST",
           body: formData,
         });

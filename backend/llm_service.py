@@ -279,7 +279,17 @@ class LLMService:
                     kwargs["tools"] = mcp_openai_tools
                     kwargs["tool_choice"] = "auto"
                 
-                response = await client.chat.completions.create(**kwargs)
+                try:
+                    response = await client.chat.completions.create(**kwargs)
+                except Exception as api_err:
+                    print(f"API error with tools (likely formatting 400): {api_err}")
+                    if "tools" in kwargs:
+                        del kwargs["tools"]
+                        del kwargs["tool_choice"]
+                        response = await client.chat.completions.create(**kwargs)
+                    else:
+                        raise api_err
+                
                 response_message = response.choices[0].message
                 
                 if response_message.tool_calls:
@@ -308,7 +318,11 @@ class LLMService:
                         except:
                             args = {}
                         print(f"Executing MCP Tool: {name} with args {args}")
-                        tool_result = await mcp_client.execute_tool(name, args)
+                        try:
+                            tool_result = await mcp_client.execute_tool(name, args)
+                        except Exception as tool_err:
+                            print(f"MCP Tool execution failed: {tool_err}")
+                            tool_result = f"Error executing tool: {tool_err}"
                         
                         messages.append({
                             "role": "tool",

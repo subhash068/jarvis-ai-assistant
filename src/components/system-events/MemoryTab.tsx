@@ -12,7 +12,7 @@ export function MemoryTab() {
   const { data: memories = [], isLoading } = useQuery({
     queryKey: ['memories'],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/memory/?user_id=1");
+      const res = await fetch("/api/memory/?user_id=1");
       if (!res.ok) throw new Error("Failed to fetch memories");
       return res.json();
     }
@@ -20,7 +20,7 @@ export function MemoryTab() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`http://localhost:8000/memory/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/memory/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error("Failed to delete memory");
     },
     onSuccess: () => {

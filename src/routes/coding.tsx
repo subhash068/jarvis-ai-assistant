@@ -46,7 +46,7 @@ function CodingPage() {
   const { data: tools = [] } = useQuery({
     queryKey: ["coding", "tools"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/coding/tools");
+      const res = await fetch("/api/coding/tools");
       if (!res.ok) throw new Error("Failed to fetch tools");
       return res.json();
     },
@@ -55,7 +55,7 @@ function CodingPage() {
   const { data: snippetData } = useQuery({
     queryKey: ["coding", "snippet"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/coding/snippet");
+      const res = await fetch("/api/coding/snippet");
       if (!res.ok) throw new Error("Failed to fetch snippet");
       return res.json();
     },
@@ -72,7 +72,7 @@ function CodingPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/coding/launch", {
+      const res = await fetch("/api/coding/launch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tool_name: selectedTool.name, prompt }),

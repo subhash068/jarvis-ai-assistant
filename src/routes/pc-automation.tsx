@@ -83,7 +83,7 @@ function PCAutomationPage() {
 
   const runAutomation = useMutation({
     mutationFn: async (instr: string) => {
-      const res = await fetch("http://localhost:8000/automation/pc/advanced", {
+      const res = await fetch("/api/automation/pc/advanced", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ instruction: instr }),

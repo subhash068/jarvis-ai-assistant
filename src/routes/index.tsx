@@ -21,7 +21,7 @@ function Dashboard() {
   const { data: analytics } = useQuery({
     queryKey: ["analytics", 1],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/analytics/1");
+      const res = await fetch("/api/analytics/1");
       if (!res.ok) throw new Error("Failed to fetch analytics");
       return res.json();
     }
@@ -30,7 +30,7 @@ function Dashboard() {
   const { data: agents = [] } = useQuery({
     queryKey: ["agents"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/agents/");
+      const res = await fetch("/api/agents/");
       if (!res.ok) throw new Error("Failed to fetch agents");
       return res.json();
     }
@@ -39,7 +39,7 @@ function Dashboard() {
   const { data: commands = [] } = useQuery({
     queryKey: ["agentLogs"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/agents/logs");
+      const res = await fetch("/api/agents/logs");
       if (!res.ok) throw new Error("Failed to fetch logs");
       return res.json();
     }

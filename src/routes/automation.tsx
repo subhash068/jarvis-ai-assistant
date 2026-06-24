@@ -22,7 +22,7 @@ function AutomationPage() {
   const { data: apps = [] } = useQuery({
     queryKey: ["automation", "apps"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/automation/apps");
+      const res = await fetch("/api/automation/apps");
       if (!res.ok) throw new Error("Failed to fetch apps");
       return res.json();
     },
@@ -31,7 +31,7 @@ function AutomationPage() {
   const { data: files = [] } = useQuery({
     queryKey: ["automation", "files"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/automation/files");
+      const res = await fetch("/api/automation/files");
       if (!res.ok) throw new Error("Failed to fetch files");
       return res.json();
     },
@@ -40,7 +40,7 @@ function AutomationPage() {
   const { data: browserActions = [] } = useQuery({
     queryKey: ["automation", "browserActions"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/automation/browser/actions");
+      const res = await fetch("/api/automation/browser/actions");
       if (!res.ok) throw new Error("Failed to fetch browser actions");
       return res.json();
     },
@@ -49,7 +49,7 @@ function AutomationPage() {
   const { data: tasks = [] } = useQuery({
     queryKey: ["automation", "tasks"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:8000/automation/tasks");
+      const res = await fetch("/api/automation/tasks");
       if (!res.ok) throw new Error("Failed to fetch tasks");
       return res.json();
     },
@@ -57,7 +57,7 @@ function AutomationPage() {
   });
 
   const handleDownload = (filename: string) => {
-    window.open(`http://localhost:8000/automation/files/${filename}`, "_blank");
+    window.open(`/api/automation/files/${filename}`, "_blank");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +68,7 @@ function AutomationPage() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:8000/automation/files", {
+      const res = await fetch("/api/automation/files", {
         method: "POST",
         body: formData,
       });
@@ -84,7 +84,7 @@ function AutomationPage() {
 
   const handleAppLaunch = async (appName: string) => {
     try {
-      const res = await fetch("http://localhost:8000/automation/app", {
+      const res = await fetch("/api/automation/app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ app_name: appName }),
@@ -101,7 +101,7 @@ function AutomationPage() {
 
   const handleBrowserAction = async (action: string) => {
     try {
-      const res = await fetch("http://localhost:8000/automation/browser", {
+      const res = await fetch("/api/automation/browser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: action }),
