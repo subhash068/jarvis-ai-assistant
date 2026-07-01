@@ -16,14 +16,19 @@ import { Route as SystemEventsRouteImport } from './routes/system-events'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResearchRouteImport } from './routes/research'
 import { Route as ProductivityRouteImport } from './routes/productivity'
+import { Route as PhoneIntelligenceRouteImport } from './routes/phone-intelligence'
 import { Route as PcAutomationRouteImport } from './routes/pc-automation'
+import { Route as OsintRouteImport } from './routes/osint'
 import { Route as McpPluginsRouteImport } from './routes/mcp-plugins'
+import { Route as LeadGenRouteImport } from './routes/lead-gen'
 import { Route as ImageGenerationRouteImport } from './routes/image-generation'
 import { Route as DoctorAssistantRouteImport } from './routes/doctor-assistant'
+import { Route as DemoAgentRouteImport } from './routes/demo-agent'
 import { Route as CodingRouteImport } from './routes/coding'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BrowserRouteImport } from './routes/browser'
 import { Route as AutomationRouteImport } from './routes/automation'
+import { Route as IndexRouteImport } from './routes/index'
 
 const VoiceRoute = VoiceRouteImport.update({
   id: '/voice',
@@ -60,14 +65,29 @@ const ProductivityRoute = ProductivityRouteImport.update({
   path: '/productivity',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PhoneIntelligenceRoute = PhoneIntelligenceRouteImport.update({
+  id: '/phone-intelligence',
+  path: '/phone-intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PcAutomationRoute = PcAutomationRouteImport.update({
   id: '/pc-automation',
   path: '/pc-automation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OsintRoute = OsintRouteImport.update({
+  id: '/osint',
+  path: '/osint',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpPluginsRoute = McpPluginsRouteImport.update({
   id: '/mcp-plugins',
   path: '/mcp-plugins',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeadGenRoute = LeadGenRouteImport.update({
+  id: '/lead-gen',
+  path: '/lead-gen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImageGenerationRoute = ImageGenerationRouteImport.update({
@@ -78,6 +98,11 @@ const ImageGenerationRoute = ImageGenerationRouteImport.update({
 const DoctorAssistantRoute = DoctorAssistantRouteImport.update({
   id: '/doctor-assistant',
   path: '/doctor-assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoAgentRoute = DemoAgentRouteImport.update({
+  id: '/demo-agent',
+  path: '/demo-agent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CodingRoute = CodingRouteImport.update({
@@ -100,16 +125,26 @@ const AutomationRoute = AutomationRouteImport.update({
   path: '/automation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/automation': typeof AutomationRoute
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
+  '/demo-agent': typeof DemoAgentRoute
   '/doctor-assistant': typeof DoctorAssistantRoute
   '/image-generation': typeof ImageGenerationRoute
+  '/lead-gen': typeof LeadGenRoute
   '/mcp-plugins': typeof McpPluginsRoute
+  '/osint': typeof OsintRoute
   '/pc-automation': typeof PcAutomationRoute
+  '/phone-intelligence': typeof PhoneIntelligenceRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
@@ -119,14 +154,19 @@ export interface FileRoutesByFullPath {
   '/voice': typeof VoiceRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/automation': typeof AutomationRoute
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
+  '/demo-agent': typeof DemoAgentRoute
   '/doctor-assistant': typeof DoctorAssistantRoute
   '/image-generation': typeof ImageGenerationRoute
+  '/lead-gen': typeof LeadGenRoute
   '/mcp-plugins': typeof McpPluginsRoute
+  '/osint': typeof OsintRoute
   '/pc-automation': typeof PcAutomationRoute
+  '/phone-intelligence': typeof PhoneIntelligenceRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
@@ -137,14 +177,19 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/automation': typeof AutomationRoute
   '/browser': typeof BrowserRoute
   '/chat': typeof ChatRoute
   '/coding': typeof CodingRoute
+  '/demo-agent': typeof DemoAgentRoute
   '/doctor-assistant': typeof DoctorAssistantRoute
   '/image-generation': typeof ImageGenerationRoute
+  '/lead-gen': typeof LeadGenRoute
   '/mcp-plugins': typeof McpPluginsRoute
+  '/osint': typeof OsintRoute
   '/pc-automation': typeof PcAutomationRoute
+  '/phone-intelligence': typeof PhoneIntelligenceRoute
   '/productivity': typeof ProductivityRoute
   '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
@@ -156,14 +201,19 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/automation'
     | '/browser'
     | '/chat'
     | '/coding'
+    | '/demo-agent'
     | '/doctor-assistant'
     | '/image-generation'
+    | '/lead-gen'
     | '/mcp-plugins'
+    | '/osint'
     | '/pc-automation'
+    | '/phone-intelligence'
     | '/productivity'
     | '/research'
     | '/settings'
@@ -173,14 +223,19 @@ export interface FileRouteTypes {
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/automation'
     | '/browser'
     | '/chat'
     | '/coding'
+    | '/demo-agent'
     | '/doctor-assistant'
     | '/image-generation'
+    | '/lead-gen'
     | '/mcp-plugins'
+    | '/osint'
     | '/pc-automation'
+    | '/phone-intelligence'
     | '/productivity'
     | '/research'
     | '/settings'
@@ -190,14 +245,19 @@ export interface FileRouteTypes {
     | '/voice'
   id:
     | '__root__'
+    | '/'
     | '/automation'
     | '/browser'
     | '/chat'
     | '/coding'
+    | '/demo-agent'
     | '/doctor-assistant'
     | '/image-generation'
+    | '/lead-gen'
     | '/mcp-plugins'
+    | '/osint'
     | '/pc-automation'
+    | '/phone-intelligence'
     | '/productivity'
     | '/research'
     | '/settings'
@@ -208,14 +268,19 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AutomationRoute: typeof AutomationRoute
   BrowserRoute: typeof BrowserRoute
   ChatRoute: typeof ChatRoute
   CodingRoute: typeof CodingRoute
+  DemoAgentRoute: typeof DemoAgentRoute
   DoctorAssistantRoute: typeof DoctorAssistantRoute
   ImageGenerationRoute: typeof ImageGenerationRoute
+  LeadGenRoute: typeof LeadGenRoute
   McpPluginsRoute: typeof McpPluginsRoute
+  OsintRoute: typeof OsintRoute
   PcAutomationRoute: typeof PcAutomationRoute
+  PhoneIntelligenceRoute: typeof PhoneIntelligenceRoute
   ProductivityRoute: typeof ProductivityRoute
   ResearchRoute: typeof ResearchRoute
   SettingsRoute: typeof SettingsRoute
@@ -276,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductivityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/phone-intelligence': {
+      id: '/phone-intelligence'
+      path: '/phone-intelligence'
+      fullPath: '/phone-intelligence'
+      preLoaderRoute: typeof PhoneIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pc-automation': {
       id: '/pc-automation'
       path: '/pc-automation'
@@ -283,11 +355,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PcAutomationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/osint': {
+      id: '/osint'
+      path: '/osint'
+      fullPath: '/osint'
+      preLoaderRoute: typeof OsintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp-plugins': {
       id: '/mcp-plugins'
       path: '/mcp-plugins'
       fullPath: '/mcp-plugins'
       preLoaderRoute: typeof McpPluginsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lead-gen': {
+      id: '/lead-gen'
+      path: '/lead-gen'
+      fullPath: '/lead-gen'
+      preLoaderRoute: typeof LeadGenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/image-generation': {
@@ -302,6 +388,13 @@ declare module '@tanstack/react-router' {
       path: '/doctor-assistant'
       fullPath: '/doctor-assistant'
       preLoaderRoute: typeof DoctorAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-agent': {
+      id: '/demo-agent'
+      path: '/demo-agent'
+      fullPath: '/demo-agent'
+      preLoaderRoute: typeof DemoAgentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coding': {
@@ -332,18 +425,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutomationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AutomationRoute: AutomationRoute,
   BrowserRoute: BrowserRoute,
   ChatRoute: ChatRoute,
   CodingRoute: CodingRoute,
+  DemoAgentRoute: DemoAgentRoute,
   DoctorAssistantRoute: DoctorAssistantRoute,
   ImageGenerationRoute: ImageGenerationRoute,
+  LeadGenRoute: LeadGenRoute,
   McpPluginsRoute: McpPluginsRoute,
+  OsintRoute: OsintRoute,
   PcAutomationRoute: PcAutomationRoute,
+  PhoneIntelligenceRoute: PhoneIntelligenceRoute,
   ProductivityRoute: ProductivityRoute,
   ResearchRoute: ResearchRoute,
   SettingsRoute: SettingsRoute,

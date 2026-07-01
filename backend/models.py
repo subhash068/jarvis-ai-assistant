@@ -50,8 +50,67 @@ class Memory(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     category = Column(String(50), nullable=False)
-    content = Column(Text, nullable=False)
+    key = Column(String(100), nullable=False)
+    value = Column(Text, nullable=False)
+    importance = Column(Integer, default=1)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+
+class EpisodicMemory(Base):
+    __tablename__ = "episodic_memories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    time = Column(DateTime(timezone=True), server_default=func.now())
+    importance = Column(Integer, default=1)
+    tags = Column(String(200), nullable=True) # Comma-separated tags
+
+    user = relationship("User")
+
+class SkillMemory(Base):
+    __tablename__ = "skill_memories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    skill_category = Column(String(100), nullable=False) # e.g., 'Preferred backend'
+    preference = Column(String(100), nullable=False) # e.g., 'Go'
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+
+class ToolMemory(Base):
+    __tablename__ = "tool_memories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    tool_name = Column(String(100), nullable=False)
+    configuration = Column(Text, nullable=False) # JSON or descriptive string
+    status = Column(String(50), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User")
+
+class ProjectMemory(Base):
+    __tablename__ = "project_memories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    project_name = Column(String(100), nullable=False)
+    files = Column(Text, nullable=True) # Comma separated or JSON
+    tasks = Column(Text, nullable=True)
+    architecture = Column(Text, nullable=True)
+    goals = Column(Text, nullable=True)
+    deadlines = Column(String(200), nullable=True)
+    tech_stack = Column(String(200), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     user = relationship("User")
 

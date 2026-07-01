@@ -18,3 +18,15 @@ pyautogui
 keyboard
 websockets
 mcp>=1.0.0
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+pandas>=2.0.0
+joblib>=1.3.0
+
+apscheduler
+phonenumbers
+
+# Memory Architecture
+redis>=5.0.0
+qdrant-client>=1.8.0
+minio>=7.2.0

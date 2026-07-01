@@ -419,3 +419,44 @@ class LLMService:
             print(f"Summarization error: {e}")
             return f"Failed to generate summary: {str(e)}"
 
+    @staticmethod
+    async def analyze_medical_image(image_base64: str, patient_details: dict) -> str:
+        prompt = (
+            "You are a professional medical assistant and expert diagnostician. "
+            "Please analyze the provided medical image. "
+            "Combine your visual findings with the following patient details to produce a structured clinical report.\n\n"
+            f"Patient Name: {patient_details.get('name', 'N/A')}\n"
+            f"Age: {patient_details.get('age', 'N/A')}\n"
+            f"Gender: {patient_details.get('gender', 'N/A')}\n"
+            f"Presenting Complaints: {patient_details.get('complaints', 'N/A')}\n\n"
+            "Format the report clearly in Markdown. Include:\n"
+            "1. Patient Summary\n"
+            "2. Visual Findings (Image Analysis)\n"
+            "3. Possible Assessment\n"
+            "4. Recommended Next Steps / Plan\n"
+        )
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_base64}",
+                        },
+                    },
+                ],
+            }
+        ]
+        try:
+            response = await client.chat.completions.create(
+                model=MODELS["vision"],
+                messages=messages,
+                temperature=0.3,
+                max_tokens=2000
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"Vision analysis error: {e}")
+            return f"Failed to generate medical image report: {str(e)}"

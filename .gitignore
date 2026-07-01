@@ -17,6 +17,15 @@ dist-ssr
 .nitro
 *.local
 
+
+__pycache__
+backend/demo_agent/outputs
+
+
+
+
+
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
@@ -35,3 +44,5 @@ dist-ssr
 # Secrets
 .env
 **/.env
+backend/demo_agent/config/token.json
+backend/demo_agent/config/client_secrets.json

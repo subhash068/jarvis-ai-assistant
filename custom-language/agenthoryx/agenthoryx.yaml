@@ -1,5 +1,0 @@
-name: my-agenthoryx-project
-version: 1.0.0
-author: anonymous
-dependencies:
-  ai-agent: ^latest

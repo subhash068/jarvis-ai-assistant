@@ -139,3 +139,19 @@ async def get_consultations(user_id: int = 1):
             }
             for c in consultations
         ]
+
+from pydantic import BaseModel
+from fastapi import HTTPException
+
+class VisionAnalysisRequest(BaseModel):
+    image_base64: str
+    patient_details: dict
+
+@router.post("/analyze_vision")
+async def analyze_vision(request: VisionAnalysisRequest):
+    try:
+        report = await LLMService.analyze_medical_image(request.image_base64, request.patient_details)
+        return {"report": report}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

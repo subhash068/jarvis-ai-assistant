@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  demo_agent:
+    build:
+      context: .
+      dockerfile: demo_agent.Dockerfile
+    env_file:
+      - ./backend/.env
+    volumes:
+      # Mount the config directory to provide YouTube credentials
+      - ./backend/demo_agent/config:/app/demo_agent/config
+      # Mount the outputs directory so you can view the generated videos on your host machine
+      - ./backend/demo_agent/outputs:/app/demo_agent/outputs
+    # We add this capability so the screen recording (which uses a headless buffer/Xvfb) works properly if needed
+    shm_size: '2gb'

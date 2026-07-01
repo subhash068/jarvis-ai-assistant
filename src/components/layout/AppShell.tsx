@@ -2,13 +2,15 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Mic, MessageSquare, Brain, Bot, Cpu, Code2,
-  Eye, Globe, Monitor, Search, CalendarCheck, Sparkles, BarChart3, Settings, PlaySquare, Image, Server, Menu, X, Stethoscope
+  Eye, Globe, Monitor, Search, CalendarCheck, Sparkles, BarChart3, Settings, PlaySquare, Image, Server, Menu, X, Stethoscope, Target, PhoneCall
 } from "lucide-react";
 import React, { useState, type ReactNode } from "react";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/voice", label: "Voice", icon: Mic },
+  { to: "/phone-intelligence", label: "Phone Intelligence", icon: PhoneCall },
+  { to: "/osint", label: "OSINT Workspace", icon: Search },
   { to: "/doctor-assistant", label: "Doctor Assistant", icon: Stethoscope },
   { to: "/chat", label: "Chat", icon: MessageSquare },
   { to: "/automation", label: "Automation", icon: Cpu },
@@ -22,6 +24,7 @@ const nav = [
   { to: "/productivity", label: "Productivity", icon: CalendarCheck },
   { to: "/mcp-plugins", label: "MCP Plugins", icon: Server },
   { to: "/system-events", label: "System Events", icon: Brain },
+  { to: "/lead-gen", label: "Lead Gen Agent", icon: Target },
   { to: "/settings", label: "Settings", icon: Settings }
 ] as const;
 

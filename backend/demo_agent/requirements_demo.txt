@@ -1,0 +1,11 @@
+playwright>=1.48.0
+edge-tts
+mss
+pydantic>=2.7.0
+openai
+moviepy
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
+groq
+python-dotenv

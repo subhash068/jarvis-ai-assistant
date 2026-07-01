@@ -9,7 +9,11 @@ if venv_path not in sys.path:
 
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from routers import chat, memory, settings, analytics, agents, productivity, research, automation, coding, vision, voice, testing, mcp, doctor_assistant
+from routers import chat, memory, settings, analytics, agents, productivity, research, automation, coding, vision, voice, testing, mcp, doctor_assistant, lead_gen, crm, phone, osint, demo
+
+import asyncio
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 app = FastAPI(
     title="Jarvis AI Assistant API",
@@ -33,6 +37,11 @@ api_router.include_router(voice.router)
 api_router.include_router(testing.router)
 api_router.include_router(mcp.router)
 api_router.include_router(doctor_assistant.router)
+api_router.include_router(lead_gen.router)
+api_router.include_router(crm.router)
+api_router.include_router(phone.router)
+api_router.include_router(osint.router)
+api_router.include_router(demo.router)
 
 app.include_router(api_router)
 
@@ -40,6 +49,10 @@ from fastapi.staticfiles import StaticFiles
 playwright_report_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "playwright-engine", "playwright-report"))
 os.makedirs(playwright_report_dir, exist_ok=True)
 app.mount("/api/testing/report", StaticFiles(directory=playwright_report_dir, html=True), name="playwright-report")
+
+recordings_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "static", "recordings"))
+os.makedirs(recordings_dir, exist_ok=True)
+app.mount("/static/recordings", StaticFiles(directory=recordings_dir), name="recordings")
 
 
 # Configure CORS for the frontend
@@ -58,3 +71,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+from lead_gen_scheduler import start_scheduler, stop_scheduler
+
+@app.on_event("startup")
+async def startup_event():
+    start_scheduler()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    stop_scheduler()
